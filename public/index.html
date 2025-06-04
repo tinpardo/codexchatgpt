@@ -2,9 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Diseño de Redes</title>
-  <link rel="stylesheet" href="https://unpkg.com/react-flow-renderer/dist/style.css" />
-  <link rel="stylesheet" href="https://unpkg.com/react-flow-renderer/dist/theme-default.css" />
+  <link rel="stylesheet" href="https://unpkg.com/reactflow/dist/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/reactflow/dist/theme-default.css" />
   <style>
     body, html, #root {
       margin: 0;
@@ -63,10 +64,8 @@
       );
     }
 
-    ReactDOM.render(
-      <FlowEditor />,
-      document.getElementById('root')
-    );
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<FlowEditor />);
   </script>
 </body>
 </html>
