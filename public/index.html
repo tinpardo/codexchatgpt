@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Diseño de Redes</title>
+  <link rel="stylesheet" href="https://unpkg.com/react-flow-renderer/dist/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/react-flow-renderer/dist/theme-default.css" />
+  <style>
+    body, html, #root {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/react-flow-renderer/dist/react-flow-renderer.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { ReactFlow, MiniMap, Controls, Background } = window.ReactFlow;
+
+    function FlowEditor() {
+      const [nodes, setNodes] = React.useState([
+        { id: '1', data: { label: 'Nodo 1' }, position: { x: 0, y: 0 } },
+        { id: '2', data: { label: 'Nodo 2' }, position: { x: 100, y: 100 } }
+      ]);
+      const [edges, setEdges] = React.useState([
+        { id: 'e1-2', source: '1', target: '2' }
+      ]);
+
+      const onNodesChange = React.useCallback(
+        changes => setNodes(nds => ReactFlow.applyNodeChanges(changes, nds)),
+        []
+      );
+      const onEdgesChange = React.useCallback(
+        changes => setEdges(eds => ReactFlow.applyEdgeChanges(changes, eds)),
+        []
+      );
+      const onConnect = React.useCallback(
+        connection => setEdges(eds => ReactFlow.addEdge(connection, eds)),
+        []
+      );
+
+      return (
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          fitView
+        >
+          <MiniMap />
+          <Controls />
+          <Background />
+        </ReactFlow>
+      );
+    }
+
+    ReactDOM.render(
+      <FlowEditor />,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+</html>
