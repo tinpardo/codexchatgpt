@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import Link from 'next/link';
 import ReactFlow, { MiniMap, Controls, Background, addEdge, applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -26,6 +27,10 @@ export default function Home() {
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
+      <nav style={{ padding: '10px', background: '#eee' }}>
+        <Link href="/">ReactFlow</Link> | <Link href="/canvas">Canvas</Link>
+      </nav>
+      <div style={{ height: 'calc(100% - 40px)' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -38,6 +43,7 @@ export default function Home() {
         <Controls />
         <Background />
       </ReactFlow>
+      </div>
     </div>
   );
 }
