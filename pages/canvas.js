@@ -323,6 +323,26 @@ export default function CanvasPage() {
     exportHTML(canvasRef.current);
   };
 
+  const resizeSelected = (delta) => {
+    if (selectedId === null) return;
+    setShapes((prev) =>
+      prev.map((s) => {
+        if (s.id !== selectedId) return s;
+        if (s.type === 'text') {
+          return { ...s, fontSize: Math.max(5, (s.fontSize || 10) + delta) };
+        }
+        if (['circle', 'pentagon', 'hexagon', 'heptagon', 'octagon', 'star'].includes(s.type)) {
+          return { ...s, radius: Math.max(5, (s.radius || 10) + delta) };
+        }
+        return {
+          ...s,
+          width: Math.max(5, (s.width || 10) + delta),
+          height: Math.max(5, (s.height || 10) + delta),
+        };
+      })
+    );
+  };
+
 
   const updateCurrent = (field, value) => {
     setCurrent({ ...current, [field]: value });
@@ -470,6 +490,12 @@ export default function CanvasPage() {
         <button onClick={saveJSON}>Guardar JSON</button>
         <button onClick={handleSavePDF}>Guardar PDF</button>
         <button onClick={handleExportHTML}>Exportar HTML</button>
+        {selectedId !== null && (
+          <div style={{ marginTop: '10px' }}>
+            <button onClick={() => resizeSelected(10)}>Aumentar Tamaño</button>
+            <button onClick={() => resizeSelected(-10)} style={{ marginLeft: '4px' }}>Reducir Tamaño</button>
+          </div>
+        )}
         <input type="file" accept="application/json" onChange={loadJSON} />
       </div>
       <canvas ref={canvasRef} width={800} height={600} style={{ border: '1px solid black', margin: '10px' }} />
