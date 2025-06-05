@@ -49,6 +49,9 @@ export default function CanvasPage() {
   const [rotateId, setRotateId] = useState(null);
   const [rotateStart, setRotateStart] = useState(null);
   const [previewShape, setPreviewShape] = useState(null);
+  const [canvasWidth, setCanvasWidth] = useState(800);
+  const [canvasHeight, setCanvasHeight] = useState(600);
+  const [formatName, setFormatName] = useState('');
 
 
   useEffect(() => {
@@ -63,7 +66,7 @@ export default function CanvasPage() {
       drawShape(ctx, previewShape);
       ctx.globalAlpha = 1;
     }
-  }, [shapes, previewShape, selectedId]);
+  }, [shapes, previewShape, selectedId, canvasWidth, canvasHeight]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -423,6 +426,22 @@ export default function CanvasPage() {
     { type: 'text', icon: <TbTypography /> },
   ];
 
+  const paperFormats = [
+    { name: 'Carta', width: 816, height: 1056 },
+    { name: 'Legal', width: 816, height: 1344 },
+    { name: 'A4', width: 794, height: 1123 },
+    { name: 'A3', width: 1123, height: 1587 },
+  ];
+
+  const handleFormatChange = (e) => {
+    const fmt = paperFormats.find((f) => f.name === e.target.value);
+    if (fmt) {
+      setCanvasWidth(fmt.width);
+      setCanvasHeight(fmt.height);
+      setFormatName(fmt.name);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <div style={{ width: '250px', padding: '10px', overflowY: 'auto' }}>
@@ -530,8 +549,28 @@ export default function CanvasPage() {
           </div>
         )}
         <input type="file" accept="application/json" onChange={loadJSON} />
+        <div style={{ marginTop: '10px' }}>
+          <label>
+            Tamaño Página:
+            <select onChange={handleFormatChange} value={formatName}>
+              <option value="" disabled>
+                Seleccionar formato
+              </option>
+              {paperFormats.map((fmt) => (
+                <option key={fmt.name} value={fmt.name}>
+                  {fmt.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
-      <canvas ref={canvasRef} width={800} height={600} style={{ border: '1px solid black', margin: '10px' }} />
+      <canvas
+        ref={canvasRef}
+        width={canvasWidth}
+        height={canvasHeight}
+        style={{ border: '1px solid black', margin: '10px' }}
+      />
     </div>
   );
 }
