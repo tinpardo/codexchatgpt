@@ -36,3 +36,4 @@ El archivo `pages/canvas.js` implementa un editor de formas basado en la etiquet
 4. Las figuras se crean arrastrando sobre el lienzo al igual que las imágenes. Al seleccionar un objeto aparece un cuadro de selección con manejadores en las esquinas para cambiar su tamaño y un controlador para rotarlo.
 5. Puedes aumentar o reducir su tamaño usando los nuevos botones de "Aumentar Tamaño" y "Reducir Tamaño".
 6. Exportar el contenido del lienzo a **PDF** o **HTML** desde los botones correspondientes.
+7. Cambiar el tamaño del lienzo a formatos de página estándar como **Carta**, **Legal**, **A4** o **A3**.
