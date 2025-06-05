@@ -72,7 +72,12 @@ export default function CanvasPage() {
     const canvas = canvasRef.current;
     const getPos = (e) => {
       const rect = canvas.getBoundingClientRect();
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY,
+      };
     };
     const hit = (shape, x, y) => {
       const { w, h } = bounds(shape);
