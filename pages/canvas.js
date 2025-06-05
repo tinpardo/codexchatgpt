@@ -41,6 +41,56 @@ export default function CanvasPage() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizingId, setResizingId] = useState(null);
   const [resizeStart, setResizeStart] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [drawingShape, setDrawingShape] = useState(false);
+  const [pendingShape, setPendingShape] = useState(null);
+  const [shapeStart, setShapeStart] = useState(null);
+  const [rotateId, setRotateId] = useState(null);
+  const [rotateStart, setRotateStart] = useState(null);
+
+  const pointToShape = (shape, px, py) => {
+    const angle = (-shape.rotation * Math.PI) / 180;
+    const dx = px - shape.x;
+    const dy = py - shape.y;
+    return {
+      x: dx * Math.cos(angle) - dy * Math.sin(angle),
+      y: dx * Math.sin(angle) + dy * Math.cos(angle),
+    };
+  };
+
+  const bounds = (shape) => {
+    const w = shape.width || shape.radius * 2 || shape.fontSize * (shape.text?.length || 1);
+    const h = shape.height || shape.radius * 2 || shape.fontSize;
+    return { w, h };
+  };
+
+  const cornerHit = (shape, px, py) => {
+    const { w, h } = bounds(shape);
+    const p = pointToShape(shape, px, py);
+    const size = 6;
+    if (Math.abs(p.x + w / 2) <= size && Math.abs(p.y + h / 2) <= size) return 'nw';
+    if (Math.abs(p.x - w / 2) <= size && Math.abs(p.y + h / 2) <= size) return 'ne';
+    if (Math.abs(p.x - w / 2) <= size && Math.abs(p.y - h / 2) <= size) return 'se';
+    if (Math.abs(p.x + w / 2) <= size && Math.abs(p.y - h / 2) <= size) return 'sw';
+    if (Math.abs(p.x) <= size && Math.abs(p.y + h / 2 + 20) <= size) return 'rotate';
+    return null;
+  };
+
+  const getCornerPos = (shape, corner) => {
+    const { w, h } = bounds(shape);
+    const map = {
+      nw: { x: -w / 2, y: -h / 2 },
+      ne: { x: w / 2, y: -h / 2 },
+      se: { x: w / 2, y: h / 2 },
+      sw: { x: -w / 2, y: h / 2 },
+    };
+    const pt = map[corner];
+    const angle = (shape.rotation * Math.PI) / 180;
+    return {
+      x: shape.x + pt.x * Math.cos(angle) - pt.y * Math.sin(angle),
+      y: shape.y + pt.x * Math.sin(angle) + pt.y * Math.cos(angle),
+    };
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -63,15 +113,39 @@ export default function CanvasPage() {
       return x >= shape.x - w / 2 && x <= shape.x + w / 2 &&
              y >= shape.y - h / 2 && y <= shape.y + h / 2;
     };
+
     const handleDown = (e) => {
       const { x, y } = getPos(e);
       if (drawingImage && pendingImage) {
         setImageStart({ x, y });
         return;
       }
+      if (drawingShape && pendingShape) {
+        setShapeStart({ x, y });
+        return;
+      }
+      if (selectedId !== null) {
+        const sel = shapes.find((s) => s.id === selectedId);
+        if (sel) {
+          const hnd = cornerHit(sel, x, y);
+          if (hnd === 'rotate') {
+            setRotateId(sel.id);
+            setRotateStart({ x, y, angle: sel.rotation });
+            return;
+          }
+          if (['nw', 'ne', 'se', 'sw'].includes(hnd)) {
+            const opp = { nw: 'se', ne: 'sw', se: 'nw', sw: 'ne' }[hnd];
+            const pos = getCornerPos(sel, opp);
+            setResizingId(sel.id);
+            setResizeStart({ x: pos.x, y: pos.y, width: sel.width, height: sel.height, radius: sel.radius, fontSize: sel.fontSize });
+            return;
+          }
+        }
+      }
       for (let i = shapes.length - 1; i >= 0; i--) {
         const s = shapes[i];
         if (hit(s, x, y)) {
+          setSelectedId(s.id);
           if (e.shiftKey) {
             setResizingId(s.id);
             setResizeStart({ x, y, width: s.width, height: s.height, radius: s.radius, fontSize: s.fontSize });
@@ -79,16 +153,29 @@ export default function CanvasPage() {
             setDraggingId(s.id);
             setDragOffset({ x: x - s.x, y: y - s.y });
           }
-          break;
+          return;
         }
       }
+      setSelectedId(null);
     };
     const handleMove = (e) => {
-      if (drawingImage) return;
+      if (drawingImage || (drawingShape && shapeStart)) return;
       const { x, y } = getPos(e);
+      if (rotateId !== null && rotateStart) {
+        const sel = shapes.find((s) => s.id === rotateId);
+        if (sel) {
+          const ang0 = Math.atan2(rotateStart.y - sel.y, rotateStart.x - sel.x);
+          const ang1 = Math.atan2(y - sel.y, x - sel.x);
+          const diff = ((ang1 - ang0) * 180) / Math.PI;
+          setShapes((prev) => prev.map((s) => (s.id === rotateId ? { ...s, rotation: rotateStart.angle + diff } : s)));
+        }
+        return;
+      }
       if (resizingId !== null && resizeStart) {
-        const dx = x - resizeStart.x;
-        const dy = y - resizeStart.y;
+        const nx = x;
+        const ny = y;
+        const dx = nx - resizeStart.x;
+        const dy = ny - resizeStart.y;
         setShapes((prev) =>
           prev.map((s) => {
             if (s.id !== resizingId) return s;
@@ -98,23 +185,30 @@ export default function CanvasPage() {
             }
             if (typeof resizeStart.radius === 'number' && ['circle','pentagon','hexagon','heptagon','octagon','star'].includes(s.type)) {
               const diff = Math.max(dx, dy);
-              return { ...s, radius: Math.max(5, resizeStart.radius + diff) };
+              const midx = (nx + resizeStart.x) / 2;
+              const midy = (ny + resizeStart.y) / 2;
+              return { ...s, radius: Math.max(5, diff / 2), x: midx, y: midy };
             }
+            const midx = (nx + resizeStart.x) / 2;
+            const midy = (ny + resizeStart.y) / 2;
             return {
               ...s,
-              width: Math.max(5, resizeStart.width + dx),
-              height: Math.max(5, resizeStart.height + dy),
+              width: Math.max(5, Math.abs(dx)),
+              height: Math.max(5, Math.abs(dy)),
+              x: midx,
+              y: midy,
             };
           })
         );
         return;
       }
-      if (draggingId === null) return;
-      setShapes((prev) =>
-        prev.map((s) =>
-          s.id === draggingId ? { ...s, x: x - dragOffset.x, y: y - dragOffset.y } : s
-        )
-      );
+      if (draggingId !== null) {
+        setShapes((prev) =>
+          prev.map((s) =>
+            s.id === draggingId ? { ...s, x: x - dragOffset.x, y: y - dragOffset.y } : s
+          )
+        );
+      }
     };
     const handleUp = (e) => {
       if (drawingImage && imageStart && pendingImage) {
@@ -139,8 +233,34 @@ export default function CanvasPage() {
         setPendingImage(null);
         return;
       }
+      if (drawingShape && shapeStart && pendingShape) {
+        const { x, y } = getPos(e);
+        const w = Math.abs(x - shapeStart.x);
+        const h = Math.abs(y - shapeStart.y);
+        const midx = (x + shapeStart.x) / 2;
+        const midy = (y + shapeStart.y) / 2;
+        const newShape = { ...pendingShape, id: Date.now(), x: midx, y: midy };
+        if (['circle','pentagon','hexagon','heptagon','octagon','star'].includes(pendingShape.type)) {
+          newShape.radius = Math.max(w, h) / 2;
+        } else if (pendingShape.type === 'square') {
+          const side = Math.max(w, h);
+          newShape.width = side;
+          newShape.height = side;
+        } else if (pendingShape.type === 'text') {
+          newShape.fontSize = Math.max(5, Math.max(w, h));
+        } else {
+          newShape.width = w;
+          newShape.height = h;
+        }
+        setShapes((prev) => [...prev, newShape]);
+        setDrawingShape(false);
+        setShapeStart(null);
+        setPendingShape(null);
+        return;
+      }
       setDraggingId(null);
       setResizingId(null);
+      setRotateId(null);
     };
     canvas.addEventListener('mousedown', handleDown);
     canvas.addEventListener('mousemove', handleMove);
@@ -150,7 +270,7 @@ export default function CanvasPage() {
       canvas.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
     };
-  }, [shapes, draggingId, dragOffset, drawingImage, imageStart, pendingImage, resizingId, resizeStart]);
+  }, [shapes, draggingId, dragOffset, drawingImage, imageStart, pendingImage, resizingId, resizeStart, drawingShape, shapeStart, pendingShape, selectedId, rotateId, rotateStart]);
 
   const drawShape = (ctx, shape) => {
     ctx.save();
@@ -294,11 +414,35 @@ export default function CanvasPage() {
       default:
         break;
     }
+    if (shape.id === selectedId) {
+      const { w, h } = bounds(shape);
+      const size = 6;
+      ctx.strokeStyle = 'blue';
+      ctx.setLineDash([4]);
+      ctx.strokeRect(-w / 2, -h / 2, w, h);
+      ctx.setLineDash([]);
+      const corners = [
+        [-w / 2, -h / 2],
+        [w / 2, -h / 2],
+        [w / 2, h / 2],
+        [-w / 2, h / 2],
+      ];
+      ctx.fillStyle = 'white';
+      corners.forEach(([cx, cy]) => {
+        ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
+        ctx.strokeRect(cx - size / 2, cy - size / 2, size, size);
+      });
+      ctx.beginPath();
+      ctx.arc(0, -h / 2 - 20, size / 2, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+    }
     ctx.restore();
   };
 
   const addShape = () => {
-    setShapes([...shapes, { ...current, id: Date.now() }]);
+    setPendingShape({ ...current });
+    setDrawingShape(true);
   };
 
   const loadJSON = (e) => {
@@ -411,6 +555,8 @@ export default function CanvasPage() {
                   handleImageClick();
                 } else {
                   updateCurrent('type', opt.type);
+                  setPendingShape({ ...current, type: opt.type });
+                  setDrawingShape(true);
                 }
               }}
             >
