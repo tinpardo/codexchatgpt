@@ -75,10 +75,9 @@ export default function CanvasPage() {
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
     const hit = (shape, x, y) => {
-      const w = shape.width || shape.radius * 2 || shape.fontSize * (shape.text?.length || 1);
-      const h = shape.height || shape.radius * 2 || shape.fontSize;
-      return x >= shape.x - w / 2 && x <= shape.x + w / 2 &&
-             y >= shape.y - h / 2 && y <= shape.y + h / 2;
+      const { w, h } = bounds(shape);
+      const p = pointToShape(shape, x, y);
+      return p.x >= -w / 2 && p.x <= w / 2 && p.y >= -h / 2 && p.y <= h / 2;
     };
 
     const handleDown = (e) => {
