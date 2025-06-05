@@ -34,3 +34,4 @@ El archivo `pages/canvas.js` implementa un editor de formas basado en la etiquet
 3. Guardar el diseño en un archivo JSON o cargar un archivo existente para
    continuar editando.
 4. Las figuras se crean arrastrando sobre el lienzo al igual que las imágenes. Al seleccionar un objeto aparece un cuadro de selección con manejadores en las esquinas para cambiar su tamaño y un controlador para rotarlo.
+5. Exportar el contenido del lienzo a **PDF** o **HTML** desde los botones correspondientes.
