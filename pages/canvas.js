@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { jsPDF } from 'jspdf';
 import { TbRectangle, TbSquare, TbCircle, TbTriangle, TbDiamond, TbPentagon, TbHexagon, TbOctagon, TbStar, TbArrowRight, TbHeart, TbTypography } from 'react-icons/tb';
 import { IoEllipse } from 'react-icons/io5';
 import { BsHeptagon } from 'react-icons/bs';
@@ -252,6 +253,20 @@ export default function CanvasPage() {
     URL.revokeObjectURL(url);
   };
 
+  const savePDF = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
+    const pdf = new jsPDF({
+      orientation,
+      unit: 'px',
+      format: [canvas.width, canvas.height],
+    });
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save('design.pdf');
+  };
+
   const updateCurrent = (field, value) => {
     setCurrent({ ...current, [field]: value });
   };
@@ -358,6 +373,7 @@ export default function CanvasPage() {
         <button onClick={addShape}>Agregar</button>
         <hr />
         <button onClick={saveJSON}>Guardar JSON</button>
+        <button onClick={savePDF}>Guardar PDF</button>
         <input type="file" accept="application/json" onChange={loadJSON} />
       </div>
       <canvas ref={canvasRef} width={800} height={600} style={{ border: '1px solid black', margin: '10px' }} />
