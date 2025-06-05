@@ -1,4 +1,14 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { TbRectangle, TbSquare, TbCircle, TbTriangle, TbDiamond, TbPentagon, TbHexagon, TbOctagon, TbStar, TbArrowRight, TbHeart, TbTypography } from 'react-icons/tb';
+import { IoEllipse } from 'react-icons/io5';
+import { BsHeptagon } from 'react-icons/bs';
+import { PiParallelogram } from 'react-icons/pi';
+
+const TrapezoidIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24">
+    <polygon points="4,6 20,6 16,18 8,18" fill="currentColor" />
+  </svg>
+);
 
 export default function CanvasPage() {
   const canvasRef = useRef(null);
@@ -21,6 +31,8 @@ export default function CanvasPage() {
     fontSize: 20,
     fontColor: '#000000'
   });
+  const [draggingId, setDraggingId] = useState(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -30,6 +42,49 @@ export default function CanvasPage() {
       drawShape(ctx, shape);
     });
   }, [shapes]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const getPos = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+    const hit = (shape, x, y) => {
+      const w = shape.width || shape.radius * 2 || shape.fontSize * (shape.text?.length || 1);
+      const h = shape.height || shape.radius * 2 || shape.fontSize;
+      return x >= shape.x - w / 2 && x <= shape.x + w / 2 &&
+             y >= shape.y - h / 2 && y <= shape.y + h / 2;
+    };
+    const handleDown = (e) => {
+      const { x, y } = getPos(e);
+      for (let i = shapes.length - 1; i >= 0; i--) {
+        const s = shapes[i];
+        if (hit(s, x, y)) {
+          setDraggingId(s.id);
+          setDragOffset({ x: x - s.x, y: y - s.y });
+          break;
+        }
+      }
+    };
+    const handleMove = (e) => {
+      if (draggingId === null) return;
+      const { x, y } = getPos(e);
+      setShapes((prev) =>
+        prev.map((s) =>
+          s.id === draggingId ? { ...s, x: x - dragOffset.x, y: y - dragOffset.y } : s
+        )
+      );
+    };
+    const handleUp = () => setDraggingId(null);
+    canvas.addEventListener('mousedown', handleDown);
+    canvas.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    return () => {
+      canvas.removeEventListener('mousedown', handleDown);
+      canvas.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, [shapes, draggingId, dragOffset]);
 
   const drawShape = (ctx, shape) => {
     ctx.save();
@@ -201,31 +256,45 @@ export default function CanvasPage() {
     setCurrent({ ...current, [field]: value });
   };
 
+  const shapeOptions = [
+    { type: 'rectangle', icon: <TbRectangle /> },
+    { type: 'square', icon: <TbSquare /> },
+    { type: 'circle', icon: <TbCircle /> },
+    { type: 'ellipse', icon: <IoEllipse /> },
+    { type: 'triangle', icon: <TbTriangle /> },
+    { type: 'diamond', icon: <TbDiamond /> },
+    { type: 'pentagon', icon: <TbPentagon /> },
+    { type: 'hexagon', icon: <TbHexagon /> },
+    { type: 'heptagon', icon: <BsHeptagon /> },
+    { type: 'octagon', icon: <TbOctagon /> },
+    { type: 'star', icon: <TbStar /> },
+    { type: 'trapezoid', icon: <TrapezoidIcon /> },
+    { type: 'parallelogram', icon: <PiParallelogram /> },
+    { type: 'arrow', icon: <TbArrowRight /> },
+    { type: 'heart', icon: <TbHeart /> },
+    { type: 'text', icon: <TbTypography /> },
+  ];
+
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <div style={{ width: '250px', padding: '10px', overflowY: 'auto' }}>
         <h2>Agregar Forma</h2>
-        <label>
-          Tipo:
-          <select value={current.type} onChange={(e) => updateCurrent('type', e.target.value)}>
-            <option value="rectangle">Rectángulo</option>
-            <option value="square">Cuadrado</option>
-            <option value="circle">Círculo</option>
-            <option value="ellipse">Elipse</option>
-            <option value="triangle">Triángulo</option>
-            <option value="diamond">Rombo</option>
-            <option value="pentagon">Pentágono</option>
-            <option value="hexagon">Hexágono</option>
-            <option value="heptagon">Heptágono</option>
-            <option value="octagon">Octágono</option>
-            <option value="star">Estrella</option>
-            <option value="trapezoid">Trapecio</option>
-            <option value="parallelogram">Paralelogramo</option>
-            <option value="arrow">Flecha</option>
-            <option value="heart">Corazón</option>
-            <option value="text">Texto</option>
-          </select>
-        </label>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
+          {shapeOptions.map((opt) => (
+            <button
+              key={opt.type}
+              style={{
+                border: current.type === opt.type ? '2px solid blue' : '1px solid #ccc',
+                padding: '4px',
+                background: '#fff',
+                cursor: 'pointer'
+              }}
+              onClick={() => updateCurrent('type', opt.type)}
+            >
+              {opt.icon}
+            </button>
+          ))}
+        </div>
         <label>
           X:
           <input type="number" value={current.x} onChange={(e) => updateCurrent('x', parseInt(e.target.value))} />
