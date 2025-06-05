@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { savePDF, exportHTML } from '../utils/export';
-import { pointToShape, bounds, cornerHit, getCornerPos, drawShape } from '../utils/shapes';
+import { pointToShape, shapeToPoint, bounds, cornerHit, getCornerPos, drawShape } from '../utils/shapes';
 import { TbRectangle, TbSquare, TbCircle, TbTriangle, TbDiamond, TbPentagon, TbHexagon, TbOctagon, TbStar, TbArrowRight, TbHeart, TbTypography } from 'react-icons/tb';
 import { IoEllipse } from 'react-icons/io5';
 import { BsHeptagon } from 'react-icons/bs';
@@ -100,8 +100,18 @@ export default function CanvasPage() {
           if (['nw', 'ne', 'se', 'sw'].includes(hnd)) {
             const opp = { nw: 'se', ne: 'sw', se: 'nw', sw: 'ne' }[hnd];
             const pos = getCornerPos(sel, opp);
+            const local = pointToShape(sel, pos.x, pos.y);
             setResizingId(sel.id);
-            setResizeStart({ x: pos.x, y: pos.y, width: sel.width, height: sel.height, radius: sel.radius, fontSize: sel.fontSize });
+            setResizeStart({
+              x: pos.x,
+              y: pos.y,
+              width: sel.width,
+              height: sel.height,
+              radius: sel.radius,
+              fontSize: sel.fontSize,
+              anchorX: local.x,
+              anchorY: local.y,
+            });
             return;
           }
         }
@@ -111,8 +121,18 @@ export default function CanvasPage() {
         if (hit(s, x, y)) {
           setSelectedId(s.id);
           if (e.shiftKey) {
+            const local = pointToShape(s, x, y);
             setResizingId(s.id);
-            setResizeStart({ x, y, width: s.width, height: s.height, radius: s.radius, fontSize: s.fontSize });
+            setResizeStart({
+              x,
+              y,
+              width: s.width,
+              height: s.height,
+              radius: s.radius,
+              fontSize: s.fontSize,
+              anchorX: local.x,
+              anchorY: local.y,
+            });
           } else {
             setDraggingId(s.id);
             setDragOffset({ x: x - s.x, y: y - s.y });
@@ -175,34 +195,47 @@ export default function CanvasPage() {
         return;
       }
       if (resizingId !== null && resizeStart) {
-        const nx = x;
-        const ny = y;
-        const dx = nx - resizeStart.x;
-        const dy = ny - resizeStart.y;
-        setShapes((prev) =>
-          prev.map((s) => {
-            if (s.id !== resizingId) return s;
-            if (s.type === 'text') {
-              const diff = Math.max(dx, dy);
-              return { ...s, fontSize: Math.max(5, resizeStart.fontSize + diff) };
-            }
-            if (typeof resizeStart.radius === 'number' && ['circle','pentagon','hexagon','heptagon','octagon','star'].includes(s.type)) {
-              const diff = Math.max(dx, dy);
-              const midx = (nx + resizeStart.x) / 2;
-              const midy = (ny + resizeStart.y) / 2;
-              return { ...s, radius: Math.max(5, diff / 2), x: midx, y: midy };
-            }
-            const midx = (nx + resizeStart.x) / 2;
-            const midy = (ny + resizeStart.y) / 2;
-            return {
-              ...s,
-              width: Math.max(5, Math.abs(dx)),
-              height: Math.max(5, Math.abs(dy)),
-              x: midx,
-              y: midy,
-            };
-          })
-        );
+        const sel = shapes.find((s) => s.id === resizingId);
+        if (sel) {
+          const curr = pointToShape(sel, x, y);
+          const start = { x: resizeStart.anchorX, y: resizeStart.anchorY };
+          const w = Math.abs(curr.x - start.x);
+          const h = Math.abs(curr.y - start.y);
+          const midLocal = { x: (curr.x + start.x) / 2, y: (curr.y + start.y) / 2 };
+          const mid = shapeToPoint(sel, midLocal.x, midLocal.y);
+          setShapes((prev) =>
+            prev.map((s) => {
+              if (s.id !== resizingId) return s;
+              if (s.type === 'text') {
+                const diff = Math.max(curr.x - start.x, curr.y - start.y);
+                return {
+                  ...s,
+                  fontSize: Math.max(5, resizeStart.fontSize + diff),
+                  x: mid.x,
+                  y: mid.y,
+                };
+              }
+              if (
+                typeof resizeStart.radius === 'number' &&
+                ['circle', 'pentagon', 'hexagon', 'heptagon', 'octagon', 'star'].includes(s.type)
+              ) {
+                const diff = Math.max(w, h);
+                return { ...s, radius: Math.max(5, diff / 2), x: mid.x, y: mid.y };
+              }
+              if (s.type === 'square') {
+                const side = Math.max(w, h);
+                return { ...s, width: side, height: side, x: mid.x, y: mid.y };
+              }
+              return {
+                ...s,
+                width: Math.max(5, w),
+                height: Math.max(5, h),
+                x: mid.x,
+                y: mid.y,
+              };
+            })
+          );
+        }
         return;
       }
       if (draggingId !== null) {
