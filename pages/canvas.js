@@ -1,8 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { jsPDF } from 'jspdf';
 import { TbRectangle, TbSquare, TbCircle, TbTriangle, TbDiamond, TbPentagon, TbHexagon, TbOctagon, TbStar, TbArrowRight, TbHeart, TbTypography } from 'react-icons/tb';
 import { IoEllipse } from 'react-icons/io5';
 import { BsHeptagon } from 'react-icons/bs';
 import { PiParallelogram } from 'react-icons/pi';
+import { MdImage } from 'react-icons/md';
 
 const TrapezoidIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24">
@@ -12,7 +14,11 @@ const TrapezoidIcon = () => (
 
 export default function CanvasPage() {
   const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [shapes, setShapes] = useState([]);
+  const [pendingImage, setPendingImage] = useState(null);
+  const [drawingImage, setDrawingImage] = useState(false);
+  const [imageStart, setImageStart] = useState(null);
   const [current, setCurrent] = useState({
     type: 'rectangle',
     x: 50,
@@ -57,6 +63,10 @@ export default function CanvasPage() {
     };
     const handleDown = (e) => {
       const { x, y } = getPos(e);
+      if (drawingImage && pendingImage) {
+        setImageStart({ x, y });
+        return;
+      }
       for (let i = shapes.length - 1; i >= 0; i--) {
         const s = shapes[i];
         if (hit(s, x, y)) {
@@ -67,7 +77,7 @@ export default function CanvasPage() {
       }
     };
     const handleMove = (e) => {
-      if (draggingId === null) return;
+      if (drawingImage || draggingId === null) return;
       const { x, y } = getPos(e);
       setShapes((prev) =>
         prev.map((s) =>
@@ -75,7 +85,31 @@ export default function CanvasPage() {
         )
       );
     };
-    const handleUp = () => setDraggingId(null);
+    const handleUp = (e) => {
+      if (drawingImage && imageStart && pendingImage) {
+        const { x, y } = getPos(e);
+        const newShape = {
+          id: Date.now(),
+          type: 'image',
+          x: (imageStart.x + x) / 2,
+          y: (imageStart.y + y) / 2,
+          width: Math.abs(x - imageStart.x),
+          height: Math.abs(y - imageStart.y),
+          src: pendingImage.src,
+          img: pendingImage.img,
+          rotation: 0,
+          opacity: 1,
+          strokeWidth: 0,
+          lineDash: 0
+        };
+        setShapes((prev) => [...prev, newShape]);
+        setDrawingImage(false);
+        setImageStart(null);
+        setPendingImage(null);
+        return;
+      }
+      setDraggingId(null);
+    };
     canvas.addEventListener('mousedown', handleDown);
     canvas.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleUp);
@@ -84,7 +118,7 @@ export default function CanvasPage() {
       canvas.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
     };
-  }, [shapes, draggingId, dragOffset]);
+  }, [shapes, draggingId, dragOffset, drawingImage, imageStart, pendingImage]);
 
   const drawShape = (ctx, shape) => {
     ctx.save();
@@ -213,6 +247,11 @@ export default function CanvasPage() {
         ctx.fill();
         ctx.stroke();
         break;
+      case 'image':
+        if (shape.img) {
+          ctx.drawImage(shape.img, -shape.width/2, -shape.height/2, shape.width, shape.height);
+        }
+        break;
       case 'text':
         ctx.fillStyle = shape.fontColor;
         ctx.font = `${shape.fontSize}px sans-serif`;
@@ -236,13 +275,22 @@ export default function CanvasPage() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const data = JSON.parse(ev.target.result);
-      setShapes(data);
+      const loaded = data.map((s) => {
+        if (s.type === 'image' && s.src) {
+          const img = new Image();
+          img.src = s.src;
+          return { ...s, img };
+        }
+        return s;
+      });
+      setShapes(loaded);
     };
     reader.readAsText(file);
   };
 
   const saveJSON = () => {
-    const dataStr = JSON.stringify(shapes, null, 2);
+    const cleanShapes = shapes.map(({ img, ...rest }) => rest);
+    const dataStr = JSON.stringify(cleanShapes, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -272,10 +320,45 @@ export default function CanvasPage() {
     link.download = 'design.html';
     link.click();
     URL.revokeObjectURL(url);
+
+  const savePDF = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
+    const pdf = new jsPDF({
+      orientation,
+      unit: 'px',
+      format: [canvas.width, canvas.height],
+    });
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save('design.pdf');
   };
 
   const updateCurrent = (field, value) => {
     setCurrent({ ...current, [field]: value });
+  };
+
+  const handleImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        setPendingImage({ src: ev.target.result, img });
+        setDrawingImage(true);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const shapeOptions = [
@@ -294,6 +377,7 @@ export default function CanvasPage() {
     { type: 'parallelogram', icon: <PiParallelogram /> },
     { type: 'arrow', icon: <TbArrowRight /> },
     { type: 'heart', icon: <TbHeart /> },
+    { type: 'image', icon: <MdImage />, isImage: true },
     { type: 'text', icon: <TbTypography /> },
   ];
 
@@ -311,12 +395,25 @@ export default function CanvasPage() {
                 background: '#fff',
                 cursor: 'pointer'
               }}
-              onClick={() => updateCurrent('type', opt.type)}
+              onClick={() => {
+                if (opt.isImage) {
+                  handleImageClick();
+                } else {
+                  updateCurrent('type', opt.type);
+                }
+              }}
             >
               {opt.icon}
             </button>
           ))}
         </div>
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleImageChange}
+        />
         <label>
           X:
           <input type="number" value={current.x} onChange={(e) => updateCurrent('x', parseInt(e.target.value))} />
@@ -381,6 +478,7 @@ export default function CanvasPage() {
         <hr />
         <button onClick={saveJSON}>Guardar JSON</button>
         <button onClick={saveHTML}>Guardar HTML</button>
+        <button onClick={savePDF}>Guardar PDF</button>
         <input type="file" accept="application/json" onChange={loadJSON} />
       </div>
       <canvas ref={canvasRef} width={800} height={600} style={{ border: '1px solid black', margin: '10px' }} />
