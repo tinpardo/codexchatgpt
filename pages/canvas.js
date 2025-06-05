@@ -252,6 +252,28 @@ export default function CanvasPage() {
     URL.revokeObjectURL(url);
   };
 
+  const saveHTML = () => {
+    const canvas = canvasRef.current;
+    const dataUrl = canvas.toDataURL('image/png');
+    const htmlContent = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dise\u00f1o Canvas</title>
+</head>
+<body>
+  <img src="${dataUrl}" alt="Dise\u00f1o Canvas" />
+</body>
+</html>`;
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'design.html';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const updateCurrent = (field, value) => {
     setCurrent({ ...current, [field]: value });
   };
@@ -358,6 +380,7 @@ export default function CanvasPage() {
         <button onClick={addShape}>Agregar</button>
         <hr />
         <button onClick={saveJSON}>Guardar JSON</button>
+        <button onClick={saveHTML}>Guardar HTML</button>
         <input type="file" accept="application/json" onChange={loadJSON} />
       </div>
       <canvas ref={canvasRef} width={800} height={600} style={{ border: '1px solid black', margin: '10px' }} />
