@@ -8,6 +8,14 @@ export const pointToShape = (shape, px, py) => {
   };
 };
 
+export const shapeToPoint = (shape, px, py) => {
+  const angle = (shape.rotation * Math.PI) / 180;
+  return {
+    x: shape.x + px * Math.cos(angle) - py * Math.sin(angle),
+    y: shape.y + px * Math.sin(angle) + py * Math.cos(angle),
+  };
+};
+
 export const bounds = (shape) => {
   const w = shape.width || shape.radius * 2 || shape.fontSize * (shape.text?.length || 1);
   const h = shape.height || shape.radius * 2 || shape.fontSize;
