@@ -33,3 +33,4 @@ El archivo `pages/canvas.js` implementa un editor de formas basado en la etiquet
    texto su contenido, tamaño y color de fuente.
 3. Guardar el diseño en un archivo JSON o cargar un archivo existente para
    continuar editando.
+4. Cambiar el tamaño de las figuras manteniendo presionada la tecla **Shift** mientras las arrastras con el ratón.
