@@ -303,6 +303,50 @@ export default function CanvasPage() {
         setPreviewShape(null);
         return;
       }
+      if (resizingId !== null && resizeStart) {
+        const { x, y } = getPos(e);
+        const sel = shapes.find((s) => s.id === resizingId);
+        if (sel) {
+          const curr = pointToShape(sel, x, y);
+          const start = { x: resizeStart.anchorX, y: resizeStart.anchorY };
+          const w = Math.abs(curr.x - start.x);
+          const h = Math.abs(curr.y - start.y);
+          const midLocal = { x: (curr.x + start.x) / 2, y: (curr.y + start.y) / 2 };
+          const mid = shapeToPoint(sel, midLocal.x, midLocal.y);
+          setShapes((prev) =>
+            prev.map((s) => {
+              if (s.id !== resizingId) return s;
+              if (s.type === 'text') {
+                const diff = Math.max(curr.x - start.x, curr.y - start.y);
+                return {
+                  ...s,
+                  fontSize: Math.max(5, resizeStart.fontSize + diff),
+                  x: mid.x,
+                  y: mid.y,
+                };
+              }
+              if (
+                typeof resizeStart.radius === 'number' &&
+                ['circle', 'pentagon', 'hexagon', 'heptagon', 'octagon', 'star'].includes(s.type)
+              ) {
+                const diff = Math.max(w, h);
+                return { ...s, radius: Math.max(5, diff / 2), x: mid.x, y: mid.y };
+              }
+              if (s.type === 'square') {
+                const side = Math.max(w, h);
+                return { ...s, width: side, height: side, x: mid.x, y: mid.y };
+              }
+              return {
+                ...s,
+                width: Math.max(5, w),
+                height: Math.max(5, h),
+                x: mid.x,
+                y: mid.y,
+              };
+            })
+          );
+        }
+      }
       setDraggingId(null);
       setResizingId(null);
       setRotateId(null);
