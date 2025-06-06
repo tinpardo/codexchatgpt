@@ -89,6 +89,9 @@ export default function CanvasPage() {
       drawShape(ctx, previewShape);
       ctx.globalAlpha = 1;
     }
+    // Update thumbnail automatically whenever the canvas content changes
+    const thumb = generateThumbnail(canvas);
+    setThumbnailUrl(thumb);
   }, [shapes, previewShape, selectedId, canvasWidth, canvasHeight, selectionBounds]);
 
   useEffect(() => {
