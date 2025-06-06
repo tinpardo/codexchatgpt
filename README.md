@@ -37,3 +37,10 @@ El archivo `pages/canvas.js` implementa un editor de formas basado en la etiquet
 5. Puedes aumentar o reducir su tamaño usando los nuevos botones de "Aumentar Tamaño" y "Reducir Tamaño".
 6. Exportar el contenido del lienzo a **PDF** o **HTML** desde los botones correspondientes.
 7. Cambiar el tamaño del lienzo a formatos de página estándar como **Carta**, **Legal**, **A4** o **A3**.
+
+## Módulos
+
+El proyecto se ha organizado en archivos de módulo ubicados en la carpeta `modules`:
+
+- `modules/impresion.js` contiene las funciones para exportar el lienzo a **PDF** y **HTML**.
+- `modules/figuras.js` agrupa la lógica de transformación y dibujo de las figuras sobre el canvas.
