@@ -10,6 +10,18 @@ import { BsHeptagon } from 'react-icons/bs';
 import { PiParallelogram } from 'react-icons/pi';
 import { MdImage } from 'react-icons/md';
 import { FiMousePointer } from 'react-icons/fi';
+import {
+  MdSave,
+  MdPictureAsPdf,
+  MdCode,
+  MdZoomIn,
+  MdZoomOut,
+  MdFlipToFront,
+  MdFlipToBack,
+  MdArrowUpward,
+  MdArrowDownward,
+  MdDelete,
+} from 'react-icons/md';
 import Box from '@mui/material/Box';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -861,40 +873,40 @@ export default function CanvasPage() {
             <Typography>Acciones</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Button onClick={saveJSON} sx={{ mr: 1 }} variant="outlined">
-              Guardar JSON
+            <Button onClick={saveJSON} sx={{ mr: 1 }} variant="outlined" title="Guardar JSON">
+              <MdSave />
             </Button>
-            <Button onClick={handleSavePDF} sx={{ mr: 1 }} variant="outlined">
-              Guardar PDF
+            <Button onClick={handleSavePDF} sx={{ mr: 1 }} variant="outlined" title="Guardar PDF">
+              <MdPictureAsPdf />
             </Button>
-            <Button onClick={handleExportHTML} variant="outlined">
-              Exportar HTML
+            <Button onClick={handleExportHTML} variant="outlined" title="Exportar HTML">
+              <MdCode />
             </Button>
             {selectedId !== null && (
               <>
                 <Box sx={{ mt: 1 }}>
-                  <Button onClick={() => resizeSelected(10)} sx={{ mr: 1 }} size="small" variant="contained">
-                    Aumentar Tamaño
+                  <Button onClick={() => resizeSelected(10)} sx={{ mr: 1 }} size="small" variant="contained" title="Aumentar Tamaño">
+                    <MdZoomIn />
                   </Button>
-                  <Button onClick={() => resizeSelected(-10)} size="small" variant="contained">
-                    Reducir Tamaño
+                  <Button onClick={() => resizeSelected(-10)} size="small" variant="contained" title="Reducir Tamaño">
+                    <MdZoomOut />
                   </Button>
                 </Box>
                 <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  <Button onClick={bringSelectedToFront} size="small" variant="outlined">
-                    Al Frente
+                  <Button onClick={bringSelectedToFront} size="small" variant="outlined" title="Al Frente">
+                    <MdFlipToFront />
                   </Button>
-                  <Button onClick={sendSelectedToBack} size="small" variant="outlined">
-                    Al Fondo
+                  <Button onClick={sendSelectedToBack} size="small" variant="outlined" title="Al Fondo">
+                    <MdFlipToBack />
                   </Button>
-                  <Button onClick={bringSelectedForward} size="small" variant="outlined">
-                    Adelantar
+                  <Button onClick={bringSelectedForward} size="small" variant="outlined" title="Adelantar">
+                    <MdArrowUpward />
                   </Button>
-                  <Button onClick={sendSelectedBackward} size="small" variant="outlined">
-                    Atrasar
+                  <Button onClick={sendSelectedBackward} size="small" variant="outlined" title="Atrasar">
+                    <MdArrowDownward />
                   </Button>
-                  <Button onClick={deleteSelected} size="small" color="error" variant="contained">
-                    Eliminar
+                  <Button onClick={deleteSelected} size="small" color="error" variant="contained" title="Eliminar">
+                    <MdDelete />
                   </Button>
                 </Box>
               </>
@@ -986,40 +998,45 @@ export default function CanvasPage() {
             bringSelectedToFront();
             setContextMenu(null);
           }}
+          title="Al Frente"
         >
-          Al Frente
+          <MdFlipToFront />
         </MenuItem>
         <MenuItem
           onClick={() => {
             sendSelectedToBack();
             setContextMenu(null);
           }}
+          title="Al Fondo"
         >
-          Al Fondo
+          <MdFlipToBack />
         </MenuItem>
         <MenuItem
           onClick={() => {
             bringSelectedForward();
             setContextMenu(null);
           }}
+          title="Adelantar"
         >
-          Adelantar
+          <MdArrowUpward />
         </MenuItem>
         <MenuItem
           onClick={() => {
             sendSelectedBackward();
             setContextMenu(null);
           }}
+          title="Atrasar"
         >
-          Atrasar
+          <MdArrowDownward />
         </MenuItem>
         <MenuItem
           onClick={() => {
             deleteSelected();
             setContextMenu(null);
           }}
+          title="Eliminar"
         >
-          Eliminar
+          <MdDelete />
         </MenuItem>
       </Menu>
     </Box>
