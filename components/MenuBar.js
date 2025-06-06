@@ -35,6 +35,8 @@ export default function MenuBar({
   onSendBackward,
   onDelete,
   onAddPage,
+  onZoomIn,
+  onZoomOut,
 }) {
   const [archivoAnchor, setArchivoAnchor] = useState(null);
   const [edicionAnchor, setEdicionAnchor] = useState(null);
@@ -134,6 +136,18 @@ export default function MenuBar({
           open={Boolean(vistaAnchor)}
           onClose={closeMenu(setVistaAnchor)}
         >
+          <MenuItem onClick={() => { onZoomIn?.(); setVistaAnchor(null); }}>
+            <ListItemIcon>
+              <ZoomInIcon fontSize="small" />
+            </ListItemIcon>
+            Acercar
+          </MenuItem>
+          <MenuItem onClick={() => { onZoomOut?.(); setVistaAnchor(null); }}>
+            <ListItemIcon>
+              <ZoomOutIcon fontSize="small" />
+            </ListItemIcon>
+            Alejar
+          </MenuItem>
           <MenuItem onClick={() => { onAddPage?.(); setVistaAnchor(null); }}>
             <ListItemIcon>
               <AddIcon fontSize="small" />
