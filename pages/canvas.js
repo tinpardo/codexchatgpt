@@ -94,7 +94,7 @@ export default function CanvasPage() {
     } else {
       setSelectionBounds(null);
     }
-  }, [selectedId, shapes]);
+  }, [selectedId]);
 
   // Sync property controls with the selected shape
   useEffect(() => {
@@ -164,6 +164,7 @@ export default function CanvasPage() {
         const s = shapes[i];
         if (hit(s, x, y)) {
           setSelectedId(s.id);
+          setSelectionBounds(bounds(s));
           if (e.shiftKey) {
             setResizingId(s.id);
             setResizeStart({
@@ -183,6 +184,7 @@ export default function CanvasPage() {
         }
       }
       setSelectedId(null);
+      setSelectionBounds(null);
     };
     const handleMove = (e) => {
       const { x, y } = getPos(e);
