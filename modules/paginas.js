@@ -13,7 +13,8 @@ export function crearPagina(width = 800, height = 600) {
     id: Date.now() + Math.random(),
     width,
     height,
-    shapes: []
+    shapes: [],
+    thumbnail: null
   };
 }
 
