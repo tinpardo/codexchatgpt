@@ -39,6 +39,8 @@ import Menu from '@mui/material/Menu';
 import { crearPagina, agregarPagina } from '../modules/paginas';
 import MenuBar from '../components/MenuBar';
 import useZoom from '../modules/zoom';
+import { useUser } from '@clerk/nextjs';
+import { getAuth } from '@clerk/nextjs/server';
 
 const TrapezoidIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24">
@@ -50,6 +52,8 @@ export default function CanvasPage() {
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const jsonInputRef = useRef(null);
+  // Información del usuario autenticado
+  const { user } = useUser();
   const [shapes, setShapes] = useState([]);
   const [pendingImage, setPendingImage] = useState(null);
   const [drawingImage, setDrawingImage] = useState(false);
@@ -1241,4 +1245,18 @@ export default function CanvasPage() {
     </Box>
     </>
   );
+}
+
+// Protege la página para que solo usuarios autenticados puedan acceder
+export async function getServerSideProps(ctx) {
+  const { userId } = getAuth(ctx.req);
+  if (!userId) {
+    return {
+      redirect: {
+        destination: '/sign-in',
+        permanent: false,
+      },
+    };
+  }
+  return { props: {} };
 }
