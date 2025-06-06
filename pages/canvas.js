@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { savePDF, exportHTML } from '../utils/export';
-import { pointToShape, shapeToPoint, bounds, cornerHit, getCornerPos, drawShape } from '../utils/shapes';
+import { savePDF, exportHTML } from '../modules/impresion';
+import { pointToShape, shapeToPoint, bounds, cornerHit, getCornerPos, drawShape } from '../modules/figuras';
 import { TbRectangle, TbSquare, TbCircle, TbTriangle, TbDiamond, TbPentagon, TbHexagon, TbOctagon, TbStar, TbArrowRight, TbHeart, TbTypography } from 'react-icons/tb';
 import { IoEllipse } from 'react-icons/io5';
 import { BsHeptagon } from 'react-icons/bs';
