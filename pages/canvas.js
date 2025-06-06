@@ -88,6 +88,7 @@ export default function CanvasPage() {
   const [formatName, setFormatName] = useState('Carta');
   const [selectionBounds, setSelectionBounds] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [clipboard, setClipboard] = useState(null);
   const [pages, setPages] = useState([crearPagina(816, 1056)]);
   const [currentPage, setCurrentPage] = useState(0);
   const thumbRefs = useRef([]);
@@ -493,9 +494,9 @@ export default function CanvasPage() {
       const { x, y } = getPos(e);
       const sel = shapes.find((s) => s.id === selectedId);
       if (sel && hit(sel, x, y)) {
-        setContextMenu({ mouseX: e.clientX - 2, mouseY: e.clientY - 4 });
+        setContextMenu({ mouseX: e.clientX - 2, mouseY: e.clientY - 4, type: 'shape', pageIdx: currentPage });
       } else {
-        setContextMenu(null);
+        setContextMenu({ mouseX: e.clientX - 2, mouseY: e.clientY - 4, type: 'page', pageIdx: currentPage });
       }
     };
     canvas.addEventListener('mousedown', handleDown);
@@ -508,7 +509,7 @@ export default function CanvasPage() {
       canvas.removeEventListener('contextmenu', handleContextMenu);
       window.removeEventListener('mouseup', handleUp);
     };
-  }, [shapes, draggingId, dragOffset, drawingImage, imageStart, pendingImage, resizingId, resizeStart, drawingShape, shapeStart, pendingShape, selectedId, rotateId, rotateStart]);
+  }, [shapes, draggingId, dragOffset, drawingImage, imageStart, pendingImage, resizingId, resizeStart, drawingShape, shapeStart, pendingShape, selectedId, rotateId, rotateStart, currentPage]);
 
 
   const addShape = () => {
@@ -617,6 +618,37 @@ export default function CanvasPage() {
     setSelectedId(null);
   };
 
+  const copySelected = () => {
+    if (selectedId === null) return;
+    const sel = shapes.find((s) => s.id === selectedId);
+    if (!sel) return;
+    const { id, img, ...rest } = sel;
+    const copy = { ...rest };
+    if (sel.type === 'image' && sel.src) {
+      copy.src = sel.src;
+    }
+    setClipboard(copy);
+  };
+
+  const pasteToPage = (pageIdx) => {
+    if (!clipboard) return;
+    const newShape = { ...clipboard, id: Date.now() + Math.random() };
+    if (clipboard.type === 'image' && clipboard.src) {
+      const img = new Image();
+      img.src = clipboard.src;
+      newShape.img = img;
+    }
+    if (pageIdx === currentPage) {
+      setShapes((prev) => [...prev, newShape]);
+    } else {
+      setPages((prev) =>
+        prev.map((p, idx) =>
+          idx === pageIdx ? { ...p, shapes: [...p.shapes, newShape] } : p
+        )
+      );
+    }
+  };
+
 
   const updateCurrent = (field, value) => {
     setCurrent({ ...current, [field]: value });
@@ -707,6 +739,11 @@ export default function CanvasPage() {
 
   const handlePageChange = (e) => {
     setCurrentPage(parseInt(e.target.value));
+  };
+
+  const handleThumbContextMenu = (e, idx) => {
+    e.preventDefault();
+    setContextMenu({ mouseX: e.clientX - 2, mouseY: e.clientY - 4, type: 'page', pageIdx: idx });
   };
 
   useEffect(() => {
@@ -1033,6 +1070,7 @@ export default function CanvasPage() {
               cursor: 'pointer',
             }}
             onClick={() => setCurrentPage(idx)}
+            onContextMenu={(e) => handleThumbContextMenu(e, idx)}
           >
             {p.thumbnail ? (
               <img src={p.thumbnail} alt={`Miniatura ${idx + 1}`} style={{ width: '100%' }} />
@@ -1052,51 +1090,75 @@ export default function CanvasPage() {
           contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
         }
       >
-        <MenuItem
-          onClick={() => {
-            bringSelectedToFront();
-            setContextMenu(null);
-          }}
-          title="Al Frente"
-        >
-          <MdFlipToFront />
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            sendSelectedToBack();
-            setContextMenu(null);
-          }}
-          title="Al Fondo"
-        >
-          <MdFlipToBack />
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            bringSelectedForward();
-            setContextMenu(null);
-          }}
-          title="Adelantar"
-        >
-          <MdArrowUpward />
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            sendSelectedBackward();
-            setContextMenu(null);
-          }}
-          title="Atrasar"
-        >
-          <MdArrowDownward />
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            deleteSelected();
-            setContextMenu(null);
-          }}
-          title="Eliminar"
-        >
-          <MdDelete />
-        </MenuItem>
+        {contextMenu?.type === 'shape' && (
+          <>
+            <MenuItem
+              onClick={() => {
+                bringSelectedToFront();
+                setContextMenu(null);
+              }}
+              title="Al Frente"
+            >
+              <MdFlipToFront />
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                sendSelectedToBack();
+                setContextMenu(null);
+              }}
+              title="Al Fondo"
+            >
+              <MdFlipToBack />
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                bringSelectedForward();
+                setContextMenu(null);
+              }}
+              title="Adelantar"
+            >
+              <MdArrowUpward />
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                sendSelectedBackward();
+                setContextMenu(null);
+              }}
+              title="Atrasar"
+            >
+              <MdArrowDownward />
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                deleteSelected();
+                setContextMenu(null);
+              }}
+              title="Eliminar"
+            >
+              <MdDelete />
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                copySelected();
+                setContextMenu(null);
+              }}
+              title="Copiar"
+            >
+              Copiar
+            </MenuItem>
+          </>
+        )}
+        {contextMenu?.type === 'page' && clipboard && (
+          <MenuItem
+            onClick={() => {
+              pasteToPage(contextMenu.pageIdx);
+              setContextMenu(null);
+            }}
+            title="Pegar"
+          >
+            Pegar
+          </MenuItem>
+        )}
       </Menu>
     </Box>
     </>
