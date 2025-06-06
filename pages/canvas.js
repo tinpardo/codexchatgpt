@@ -571,6 +571,15 @@ export default function CanvasPage() {
     exportHTML(pages);
   };
 
+  const moveSelected = (dx, dy) => {
+    if (selectedId === null) return;
+    setShapes((prev) =>
+      prev.map((s) =>
+        s.id === selectedId ? { ...s, x: s.x + dx, y: s.y + dy } : s
+      )
+    );
+  };
+
 
   const resizeSelected = (delta) => {
     if (selectedId === null) return;
@@ -750,6 +759,18 @@ export default function CanvasPage() {
     const handleKey = (e) => {
       if (e.key === 'Delete') {
         deleteSelected();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        moveSelected(0, -5);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        moveSelected(0, 5);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        moveSelected(-5, 0);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        moveSelected(5, 0);
       }
     };
     window.addEventListener('keydown', handleKey);
