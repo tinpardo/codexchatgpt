@@ -524,11 +524,11 @@ export default function CanvasPage() {
   };
 
   const handleSavePDF = () => {
-    savePDF(canvasRef.current);
+    savePDF(pages);
   };
 
   const handleExportHTML = () => {
-    exportHTML(canvasRef.current);
+    exportHTML(pages);
   };
 
   const handleShowThumbnail = () => {
