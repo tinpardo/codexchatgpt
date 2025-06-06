@@ -672,54 +672,54 @@ export default function CanvasPage() {
             <TextField
               label="X"
               type="number"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.x}
               onChange={(e) => updateCurrent('x', parseInt(e.target.value))}
             />
             <TextField
               label="Y"
               type="number"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.y}
               onChange={(e) => updateCurrent('y', parseInt(e.target.value))}
             />
             <TextField
               label="Ancho"
               type="number"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.width}
               onChange={(e) => updateCurrent('width', parseInt(e.target.value))}
             />
             <TextField
               label="Alto"
               type="number"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.height}
               onChange={(e) => updateCurrent('height', parseInt(e.target.value))}
             />
             <TextField
               label="Radio"
               type="number"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.radius}
               onChange={(e) => updateCurrent('radius', parseInt(e.target.value))}
             />
             <TextField
               label="Rotación"
               type="number"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.rotation}
               onChange={(e) => updateCurrent('rotation', parseInt(e.target.value))}
             />
@@ -727,45 +727,45 @@ export default function CanvasPage() {
               label="Opacidad"
               type="number"
               inputProps={{ step: 0.1, min: 0, max: 1 }}
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.opacity}
               onChange={(e) => updateCurrent('opacity', parseFloat(e.target.value))}
             />
             <TextField
               label="Color Relleno"
               type="color"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.fillColor}
               onChange={(e) => updateCurrent('fillColor', e.target.value)}
             />
             <TextField
               label="Color Borde"
               type="color"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.strokeColor}
               onChange={(e) => updateCurrent('strokeColor', e.target.value)}
             />
             <TextField
               label="Grosor Borde"
               type="number"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.strokeWidth}
               onChange={(e) => updateCurrent('strokeWidth', parseInt(e.target.value))}
             />
             <TextField
               label="Guion Borde"
               type="number"
-              fullWidth
               size="small"
               margin="dense"
+              sx={{ width: 120 }}
               value={current.lineDash}
               onChange={(e) => updateCurrent('lineDash', parseInt(e.target.value))}
             />
@@ -773,27 +773,27 @@ export default function CanvasPage() {
               <>
                 <TextField
                   label="Texto"
-                  fullWidth
                   size="small"
                   margin="dense"
+                  sx={{ width: 120 }}
                   value={current.text}
                   onChange={(e) => updateCurrent('text', e.target.value)}
                 />
                 <TextField
                   label="Tamaño Fuente"
                   type="number"
-                  fullWidth
                   size="small"
                   margin="dense"
+                  sx={{ width: 120 }}
                   value={current.fontSize}
                   onChange={(e) => updateCurrent('fontSize', parseInt(e.target.value))}
                 />
                 <TextField
                   label="Color Fuente"
                   type="color"
-                  fullWidth
                   size="small"
                   margin="dense"
+                  sx={{ width: 120 }}
                   value={current.fontColor}
                   onChange={(e) => updateCurrent('fontColor', e.target.value)}
                 />
