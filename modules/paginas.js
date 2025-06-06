@@ -8,7 +8,7 @@
  * @param {number} height Alto de la página.
  * @returns {Object} Objeto de página.
  */
-export function crearPagina(width = 800, height = 600) {
+export function crearPagina(width = 816, height = 1056) {
   return {
     id: Date.now() + Math.random(),
     width,
@@ -25,6 +25,6 @@ export function crearPagina(width = 800, height = 600) {
  * @param {number} height Alto para la nueva página.
  * @returns {Array} Nuevo arreglo de páginas con la añadida.
  */
-export function agregarPagina(paginas, width = 800, height = 600) {
+export function agregarPagina(paginas, width = 816, height = 1056) {
   return [...paginas, crearPagina(width, height)];
 }
