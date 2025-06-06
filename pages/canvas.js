@@ -783,6 +783,7 @@ export default function CanvasPage() {
             </Button>
           </AccordionDetails>
         </Accordion>
+        {selectedId !== null && (
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography>Propiedades</Typography>
@@ -920,6 +921,7 @@ export default function CanvasPage() {
             )}
           </AccordionDetails>
         </Accordion>
+        )}
         <Accordion defaultExpanded sx={{ display: 'none' }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography>Acciones</Typography>
