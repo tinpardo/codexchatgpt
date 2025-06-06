@@ -69,13 +69,13 @@ export default function CanvasPage() {
   const [rotateId, setRotateId] = useState(null);
   const [rotateStart, setRotateStart] = useState(null);
   const [previewShape, setPreviewShape] = useState(null);
-  const [canvasWidth, setCanvasWidth] = useState(800);
-  const [canvasHeight, setCanvasHeight] = useState(600);
-  const [formatName, setFormatName] = useState('');
+  const [canvasWidth, setCanvasWidth] = useState(816);
+  const [canvasHeight, setCanvasHeight] = useState(1056);
+  const [formatName, setFormatName] = useState('Carta');
   const [selectionBounds, setSelectionBounds] = useState(null);
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
-  const [pages, setPages] = useState([crearPagina(800, 600)]);
+  const [pages, setPages] = useState([crearPagina(816, 1056)]);
   const [currentPage, setCurrentPage] = useState(0);
 
 
@@ -648,6 +648,9 @@ export default function CanvasPage() {
       setCanvasWidth(fmt.width);
       setCanvasHeight(fmt.height);
       setFormatName(fmt.name);
+      setPages((prev) =>
+        prev.map((p) => ({ ...p, width: fmt.width, height: fmt.height }))
+      );
     }
   };
 
