@@ -750,7 +750,11 @@ export default function CanvasPage() {
               style={{ display: 'none' }}
               onChange={handleImageChange}
             />
-            <Button variant="contained" onClick={addShape} sx={{ mt: 1 }}>
+            <Button
+              variant="contained"
+              onClick={addShape}
+              sx={{ mt: 1, display: 'none' }}
+            >
               Agregar
             </Button>
           </AccordionDetails>
@@ -892,7 +896,7 @@ export default function CanvasPage() {
             )}
           </AccordionDetails>
         </Accordion>
-        <Accordion defaultExpanded>
+        <Accordion defaultExpanded sx={{ display: 'none' }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography>Acciones</Typography>
           </AccordionSummary>
@@ -962,7 +966,7 @@ export default function CanvasPage() {
             </FormControl>
           </AccordionDetails>
         </Accordion>
-        <Accordion defaultExpanded>
+        <Accordion defaultExpanded sx={{ display: 'none' }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography>Páginas</Typography>
           </AccordionSummary>
