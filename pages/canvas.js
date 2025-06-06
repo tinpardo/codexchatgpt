@@ -90,6 +90,7 @@ export default function CanvasPage() {
   const [contextMenu, setContextMenu] = useState(null);
   const [pages, setPages] = useState([crearPagina(816, 1056)]);
   const [currentPage, setCurrentPage] = useState(0);
+  const thumbRefs = useRef([]);
 
 
   useEffect(() => {
@@ -457,6 +458,29 @@ export default function CanvasPage() {
               };
             })
           );
+        }
+      }
+      if (draggingId !== null) {
+        const dropIndex = thumbRefs.current.findIndex((el) => {
+          if (!el) return false;
+          const r = el.getBoundingClientRect();
+          return (
+            e.clientX >= r.left &&
+            e.clientX <= r.right &&
+            e.clientY >= r.top &&
+            e.clientY <= r.bottom
+          );
+        });
+        if (dropIndex !== -1 && dropIndex !== currentPage) {
+          const moving = shapes.find((s) => s.id === draggingId);
+          if (moving) {
+            setPages((prev) =>
+              prev.map((p, idx) =>
+                idx === dropIndex ? { ...p, shapes: [...p.shapes, moving] } : p
+              )
+            );
+            setShapes((prev) => prev.filter((s) => s.id !== draggingId));
+          }
         }
       }
       setDraggingId(null);
@@ -1002,6 +1026,7 @@ export default function CanvasPage() {
         {pages.map((p, idx) => (
           <Box
             key={p.id}
+            ref={(el) => (thumbRefs.current[idx] = el)}
             sx={{
               border: currentPage === idx ? '2px solid blue' : '1px solid #ccc',
               mb: 1,
