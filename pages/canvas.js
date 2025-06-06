@@ -6,6 +6,7 @@ import { IoEllipse } from 'react-icons/io5';
 import { BsHeptagon } from 'react-icons/bs';
 import { PiParallelogram } from 'react-icons/pi';
 import { MdImage } from 'react-icons/md';
+import { FiMousePointer } from 'react-icons/fi';
 
 const TrapezoidIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24">
@@ -38,6 +39,7 @@ export default function CanvasPage() {
     fontSize: 20,
     fontColor: '#000000'
   });
+  const [activeTool, setActiveTool] = useState('select');
   const [draggingId, setDraggingId] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizingId, setResizingId] = useState(null);
@@ -297,9 +299,7 @@ export default function CanvasPage() {
           newShape.height = h;
         }
         setShapes((prev) => [...prev, newShape]);
-        setDrawingShape(false);
         setShapeStart(null);
-        setPendingShape(null);
         setPreviewShape(null);
         return;
       }
@@ -470,6 +470,7 @@ export default function CanvasPage() {
   };
 
   const shapeOptions = [
+    { type: 'select', icon: <FiMousePointer />, isSelect: true },
     { type: 'rectangle', icon: <TbRectangle /> },
     { type: 'square', icon: <TbSquare /> },
     { type: 'circle', icon: <TbCircle /> },
@@ -514,14 +515,20 @@ export default function CanvasPage() {
             <button
               key={opt.type}
               style={{
-                border: current.type === opt.type ? '2px solid blue' : '1px solid #ccc',
+                border: activeTool === opt.type ? '2px solid blue' : '1px solid #ccc',
                 padding: '4px',
                 background: '#fff',
                 cursor: 'pointer'
               }}
               onClick={() => {
+                setActiveTool(opt.type);
                 if (opt.isImage) {
                   handleImageClick();
+                } else if (opt.isSelect) {
+                  setPendingShape(null);
+                  setPendingImage(null);
+                  setDrawingShape(false);
+                  setDrawingImage(false);
                 } else {
                   updateCurrent('type', opt.type);
                   setPendingShape({ ...current, type: opt.type });
