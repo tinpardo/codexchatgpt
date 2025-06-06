@@ -83,6 +83,17 @@ export default function CanvasPage() {
     }
   }, [selectedId, shapes]);
 
+  // Sync property controls with the selected shape
+  useEffect(() => {
+    if (selectedId !== null) {
+      const sel = shapes.find((s) => s.id === selectedId);
+      if (sel) {
+        const { id, img, ...rest } = sel;
+        setCurrent((prev) => ({ ...prev, ...rest }));
+      }
+    }
+  }, [selectedId, shapes]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const getPos = (e) => {
@@ -482,6 +493,11 @@ export default function CanvasPage() {
 
   const updateCurrent = (field, value) => {
     setCurrent({ ...current, [field]: value });
+    if (selectedId !== null && field !== 'type') {
+      setShapes((prev) =>
+        prev.map((s) => (s.id === selectedId ? { ...s, [field]: value } : s))
+      );
+    }
   };
 
   const handleImageClick = () => {
