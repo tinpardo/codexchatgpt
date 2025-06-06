@@ -37,6 +37,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import { crearPagina, agregarPagina } from '../modules/paginas';
+import MenuBar from '../components/MenuBar';
 
 const TrapezoidIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24">
@@ -47,6 +48,7 @@ const TrapezoidIcon = () => (
 export default function CanvasPage() {
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
+  const jsonInputRef = useRef(null);
   const [shapes, setShapes] = useState([]);
   const [pendingImage, setPendingImage] = useState(null);
   const [drawingImage, setDrawingImage] = useState(false);
@@ -608,6 +610,13 @@ export default function CanvasPage() {
     }
   };
 
+  const handleLoadJSONClick = () => {
+    if (jsonInputRef.current) {
+      jsonInputRef.current.value = '';
+      jsonInputRef.current.click();
+    }
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -687,7 +696,22 @@ export default function CanvasPage() {
   }, [selectedId]);
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <>
+      <MenuBar
+        onSaveJSON={saveJSON}
+        onLoadJSON={handleLoadJSONClick}
+        onSavePDF={handleSavePDF}
+        onExportHTML={handleExportHTML}
+        onResizePlus={() => resizeSelected(10)}
+        onResizeMinus={() => resizeSelected(-10)}
+        onBringToFront={bringSelectedToFront}
+        onSendToBack={sendSelectedToBack}
+        onBringForward={bringSelectedForward}
+        onSendBackward={sendSelectedBackward}
+        onDelete={deleteSelected}
+        onAddPage={handleAddPage}
+      />
+      <Box sx={{ display: 'flex', height: '100vh' }}>
       <Box sx={{ width: 250, p: 1, overflowY: 'auto' }}>
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -911,7 +935,13 @@ export default function CanvasPage() {
                 </Box>
               </>
             )}
-            <input type="file" accept="application/json" onChange={loadJSON} />
+            <input
+              type="file"
+              ref={jsonInputRef}
+              accept="application/json"
+              style={{ display: 'none' }}
+              onChange={loadJSON}
+            />
             <FormControl fullWidth sx={{ mt: 1 }} size="small">
               <InputLabel id="format-label">Tamaño Página</InputLabel>
               <Select
@@ -1040,5 +1070,6 @@ export default function CanvasPage() {
         </MenuItem>
       </Menu>
     </Box>
+    </>
   );
 }
