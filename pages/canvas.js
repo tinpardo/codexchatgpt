@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { savePDF, exportHTML } from '../modules/impresion';
+import { generateThumbnail } from '../modules/thumbnail';
 import { pointToShape, shapeToPoint, bounds, cornerHit, getCornerPos, drawShape } from '../modules/figuras';
 import { TbRectangle, TbSquare, TbCircle, TbTriangle, TbDiamond, TbPentagon, TbHexagon, TbOctagon, TbStar, TbArrowRight, TbHeart, TbTypography } from 'react-icons/tb';
 import { IoEllipse } from 'react-icons/io5';
@@ -68,6 +69,7 @@ export default function CanvasPage() {
   const [canvasHeight, setCanvasHeight] = useState(600);
   const [formatName, setFormatName] = useState('');
   const [selectionBounds, setSelectionBounds] = useState(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState(null);
 
 
   useEffect(() => {
@@ -485,6 +487,11 @@ export default function CanvasPage() {
     exportHTML(canvasRef.current);
   };
 
+  const handleShowThumbnail = () => {
+    const url = generateThumbnail(canvasRef.current);
+    setThumbnailUrl(url);
+  };
+
   const resizeSelected = (delta) => {
     if (selectedId === null) return;
     setShapes((prev) =>
@@ -770,6 +777,9 @@ export default function CanvasPage() {
             <Button onClick={handleExportHTML} variant="outlined">
               Exportar HTML
             </Button>
+            <Button onClick={handleShowThumbnail} sx={{ mt: 1 }} variant="outlined">
+              Ver Miniatura
+            </Button>
             {selectedId !== null && (
               <Box sx={{ mt: 1 }}>
                 <Button onClick={() => resizeSelected(10)} sx={{ mr: 1 }} size="small" variant="contained">
@@ -808,6 +818,11 @@ export default function CanvasPage() {
         height={canvasHeight}
         style={{ border: '1px solid black', margin: '10px' }}
       />
+      {thumbnailUrl && (
+        <Box sx={{ ml: 2 }}>
+          <img src={thumbnailUrl} alt="Miniatura" style={{ border: '1px solid #ccc' }} />
+        </Box>
+      )}
     </Box>
   );
 }
