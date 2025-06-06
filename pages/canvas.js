@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { savePDF, exportHTML } from '../modules/impresion';
 import { generateThumbnail } from '../modules/thumbnail';
 import { bringToFront, sendToBack, bringForward, sendBackward } from '../modules/arrangement';
@@ -38,6 +38,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import { crearPagina, agregarPagina } from '../modules/paginas';
 import MenuBar from '../components/MenuBar';
+import useZoom from '../modules/zoom';
 
 const TrapezoidIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24">
@@ -92,6 +93,8 @@ export default function CanvasPage() {
   const [pages, setPages] = useState([crearPagina(816, 1056)]);
   const [currentPage, setCurrentPage] = useState(0);
   const thumbRefs = useRef([]);
+  const { zoom, zoomIn, zoomOut } = useZoom();
+  const [viewRect, setViewRect] = useState(null);
 
 
   useEffect(() => {
@@ -755,6 +758,33 @@ export default function CanvasPage() {
     setContextMenu({ mouseX: e.clientX - 2, mouseY: e.clientY - 4, type: 'page', pageIdx: idx });
   };
 
+  const updateViewRect = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const left = Math.max(0, -rect.left);
+    const top = Math.max(0, -rect.top);
+    const right = Math.min(rect.width, window.innerWidth - rect.left);
+    const bottom = Math.min(rect.height, window.innerHeight - rect.top);
+    const width = Math.max(0, right - left);
+    const height = Math.max(0, bottom - top);
+    setViewRect({ x: left / zoom, y: top / zoom, width: width / zoom, height: height / zoom });
+  }, [zoom]);
+
+  useEffect(() => {
+    updateViewRect();
+    window.addEventListener('scroll', updateViewRect);
+    window.addEventListener('resize', updateViewRect);
+    return () => {
+      window.removeEventListener('scroll', updateViewRect);
+      window.removeEventListener('resize', updateViewRect);
+    };
+  }, [updateViewRect]);
+
+  useEffect(() => {
+    updateViewRect();
+  }, [zoom, updateViewRect]);
+
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key === 'Delete') {
@@ -792,6 +822,8 @@ export default function CanvasPage() {
         onSendBackward={sendSelectedBackward}
         onDelete={deleteSelected}
         onAddPage={handleAddPage}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
       />
       <Box sx={{ display: 'flex', height: '100vh' }}>
       <Box sx={{ width: 250, p: 1, overflowY: 'auto' }}>
@@ -1080,7 +1112,7 @@ export default function CanvasPage() {
         ref={canvasRef}
         width={canvasWidth}
         height={canvasHeight}
-        style={{ border: '1px solid black', margin: '10px' }}
+        style={{ border: '1px solid black', margin: '10px', transform: `scale(${zoom})`, transformOrigin: '0 0' }}
       />
       <Box sx={{ width: 200, p: 1, overflowY: 'auto' }}>
         {pages.map((p, idx) => (
@@ -1091,12 +1123,29 @@ export default function CanvasPage() {
               border: currentPage === idx ? '2px solid blue' : '1px solid #ccc',
               mb: 1,
               cursor: 'pointer',
+              position: 'relative',
             }}
             onClick={() => setCurrentPage(idx)}
             onContextMenu={(e) => handleThumbContextMenu(e, idx)}
           >
             {p.thumbnail ? (
-              <img src={p.thumbnail} alt={`Miniatura ${idx + 1}`} style={{ width: '100%' }} />
+              <>
+                <img src={p.thumbnail} alt={`Miniatura ${idx + 1}`} style={{ width: '100%' }} />
+                {currentPage === idx && viewRect && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      border: '1px solid red',
+                      boxSizing: 'border-box',
+                      pointerEvents: 'none',
+                      left: `${(viewRect.x * 200) / canvasWidth}px`,
+                      top: `${(viewRect.y * 200) / canvasWidth}px`,
+                      width: `${(viewRect.width * 200) / canvasWidth}px`,
+                      height: `${(viewRect.height * 200) / canvasWidth}px`,
+                    }}
+                  />
+                )}
+              </>
             ) : (
               <Box sx={{ width: '100%', height: 100, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Typography variant="caption">Sin vista previa</Typography>
