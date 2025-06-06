@@ -50,7 +50,7 @@ export const getCornerPos = (shape, corner) => {
   };
 };
 
-export const drawShape = (ctx, shape, selectedId) => {
+export const drawShape = (ctx, shape, selectedId, selectedBounds = null) => {
   ctx.save();
   ctx.translate(shape.x, shape.y);
   ctx.rotate((shape.rotation * Math.PI) / 180);
@@ -193,7 +193,7 @@ export const drawShape = (ctx, shape, selectedId) => {
       break;
   }
   if (shape.id === selectedId) {
-    const { w, h } = bounds(shape);
+    const { w, h } = selectedBounds || bounds(shape);
     const size = 6;
     ctx.strokeStyle = 'blue';
     ctx.setLineDash([4]);
