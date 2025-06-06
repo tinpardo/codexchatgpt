@@ -7,6 +7,19 @@ import { BsHeptagon } from 'react-icons/bs';
 import { PiParallelogram } from 'react-icons/pi';
 import { MdImage } from 'react-icons/md';
 import { FiMousePointer } from 'react-icons/fi';
+import Box from '@mui/material/Box';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 const TrapezoidIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24">
@@ -560,140 +573,239 @@ export default function CanvasPage() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      <div style={{ width: '250px', padding: '10px', overflowY: 'auto' }}>
-        <h2>Agregar Forma</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
-          {shapeOptions.map((opt) => (
-            <button
-              key={opt.type}
-              style={{
-                border: activeTool === opt.type ? '2px solid blue' : '1px solid #ccc',
-                padding: '4px',
-                background: '#fff',
-                cursor: 'pointer'
-              }}
-              onClick={() => {
-                setActiveTool(opt.type);
-                if (opt.isImage) {
-                  handleImageClick();
-                } else if (opt.isSelect) {
-                  setPendingShape(null);
-                  setPendingImage(null);
-                  setDrawingShape(false);
-                  setDrawingImage(false);
-                } else {
-                  updateCurrent('type', opt.type);
-                  setPendingShape({ ...current, type: opt.type });
-                  setDrawingShape(true);
-                }
-              }}
-            >
-              {opt.icon}
-            </button>
-          ))}
-        </div>
-        <input
-          type="file"
-          ref={fileInputRef}
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleImageChange}
-        />
-        <label>
-          X:
-          <input type="number" value={current.x} onChange={(e) => updateCurrent('x', parseInt(e.target.value))} />
-        </label>
-        <label>
-          Y:
-          <input type="number" value={current.y} onChange={(e) => updateCurrent('y', parseInt(e.target.value))} />
-        </label>
-        <label>
-          Ancho:
-          <input type="number" value={current.width} onChange={(e) => updateCurrent('width', parseInt(e.target.value))} />
-        </label>
-        <label>
-          Alto:
-          <input type="number" value={current.height} onChange={(e) => updateCurrent('height', parseInt(e.target.value))} />
-        </label>
-        <label>
-          Radio:
-          <input type="number" value={current.radius} onChange={(e) => updateCurrent('radius', parseInt(e.target.value))} />
-        </label>
-        <label>
-          Rotación:
-          <input type="number" value={current.rotation} onChange={(e) => updateCurrent('rotation', parseInt(e.target.value))} />
-        </label>
-        <label>
-          Opacidad:
-          <input type="number" step="0.1" min="0" max="1" value={current.opacity} onChange={(e) => updateCurrent('opacity', parseFloat(e.target.value))} />
-        </label>
-        <label>
-          Color Relleno:
-          <input type="color" value={current.fillColor} onChange={(e) => updateCurrent('fillColor', e.target.value)} />
-        </label>
-        <label>
-          Color Borde:
-          <input type="color" value={current.strokeColor} onChange={(e) => updateCurrent('strokeColor', e.target.value)} />
-        </label>
-        <label>
-          Grosor Borde:
-          <input type="number" value={current.strokeWidth} onChange={(e) => updateCurrent('strokeWidth', parseInt(e.target.value))} />
-        </label>
-        <label>
-          Guion Borde:
-          <input type="number" value={current.lineDash} onChange={(e) => updateCurrent('lineDash', parseInt(e.target.value))} />
-        </label>
-        {current.type === 'text' && (
-          <>
-            <label>
-              Texto:
-              <input type="text" value={current.text} onChange={(e) => updateCurrent('text', e.target.value)} />
-            </label>
-            <label>
-              Tamaño Fuente:
-              <input type="number" value={current.fontSize} onChange={(e) => updateCurrent('fontSize', parseInt(e.target.value))} />
-            </label>
-            <label>
-              Color Fuente:
-              <input type="color" value={current.fontColor} onChange={(e) => updateCurrent('fontColor', e.target.value)} />
-            </label>
-          </>
-        )}
-        <button onClick={addShape}>Agregar</button>
-        <hr />
-        <button onClick={saveJSON}>Guardar JSON</button>
-        <button onClick={handleSavePDF}>Guardar PDF</button>
-        <button onClick={handleExportHTML}>Exportar HTML</button>
-        {selectedId !== null && (
-          <div style={{ marginTop: '10px' }}>
-            <button onClick={() => resizeSelected(10)}>Aumentar Tamaño</button>
-            <button onClick={() => resizeSelected(-10)} style={{ marginLeft: '4px' }}>Reducir Tamaño</button>
-          </div>
-        )}
-        <input type="file" accept="application/json" onChange={loadJSON} />
-        <div style={{ marginTop: '10px' }}>
-          <label>
-            Tamaño Página:
-            <select onChange={handleFormatChange} value={formatName}>
-              <option value="" disabled>
-                Seleccionar formato
-              </option>
-              {paperFormats.map((fmt) => (
-                <option key={fmt.name} value={fmt.name}>
-                  {fmt.name}
-                </option>
+    <Box sx={{ display: 'flex', height: '100vh' }}>
+      <Box sx={{ width: 250, p: 1, overflowY: 'auto' }}>
+        <Accordion defaultExpanded>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>Herramientas</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+              {shapeOptions.map((opt) => (
+                <IconButton
+                  key={opt.type}
+                  color={activeTool === opt.type ? 'primary' : 'default'}
+                  onClick={() => {
+                    setActiveTool(opt.type);
+                    if (opt.isImage) {
+                      handleImageClick();
+                    } else if (opt.isSelect) {
+                      setPendingShape(null);
+                      setPendingImage(null);
+                      setDrawingShape(false);
+                      setDrawingImage(false);
+                    } else {
+                      updateCurrent('type', opt.type);
+                      setPendingShape({ ...current, type: opt.type });
+                      setDrawingShape(true);
+                    }
+                  }}
+                >
+                  {opt.icon}
+                </IconButton>
               ))}
-            </select>
-          </label>
-        </div>
-      </div>
+            </Box>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleImageChange}
+            />
+            <Button variant="contained" onClick={addShape} sx={{ mt: 1 }}>
+              Agregar
+            </Button>
+          </AccordionDetails>
+        </Accordion>
+        <Accordion defaultExpanded>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>Propiedades</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <TextField
+              label="X"
+              type="number"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.x}
+              onChange={(e) => updateCurrent('x', parseInt(e.target.value))}
+            />
+            <TextField
+              label="Y"
+              type="number"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.y}
+              onChange={(e) => updateCurrent('y', parseInt(e.target.value))}
+            />
+            <TextField
+              label="Ancho"
+              type="number"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.width}
+              onChange={(e) => updateCurrent('width', parseInt(e.target.value))}
+            />
+            <TextField
+              label="Alto"
+              type="number"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.height}
+              onChange={(e) => updateCurrent('height', parseInt(e.target.value))}
+            />
+            <TextField
+              label="Radio"
+              type="number"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.radius}
+              onChange={(e) => updateCurrent('radius', parseInt(e.target.value))}
+            />
+            <TextField
+              label="Rotación"
+              type="number"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.rotation}
+              onChange={(e) => updateCurrent('rotation', parseInt(e.target.value))}
+            />
+            <TextField
+              label="Opacidad"
+              type="number"
+              inputProps={{ step: 0.1, min: 0, max: 1 }}
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.opacity}
+              onChange={(e) => updateCurrent('opacity', parseFloat(e.target.value))}
+            />
+            <TextField
+              label="Color Relleno"
+              type="color"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.fillColor}
+              onChange={(e) => updateCurrent('fillColor', e.target.value)}
+            />
+            <TextField
+              label="Color Borde"
+              type="color"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.strokeColor}
+              onChange={(e) => updateCurrent('strokeColor', e.target.value)}
+            />
+            <TextField
+              label="Grosor Borde"
+              type="number"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.strokeWidth}
+              onChange={(e) => updateCurrent('strokeWidth', parseInt(e.target.value))}
+            />
+            <TextField
+              label="Guion Borde"
+              type="number"
+              fullWidth
+              size="small"
+              margin="dense"
+              value={current.lineDash}
+              onChange={(e) => updateCurrent('lineDash', parseInt(e.target.value))}
+            />
+            {current.type === 'text' && (
+              <>
+                <TextField
+                  label="Texto"
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  value={current.text}
+                  onChange={(e) => updateCurrent('text', e.target.value)}
+                />
+                <TextField
+                  label="Tamaño Fuente"
+                  type="number"
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  value={current.fontSize}
+                  onChange={(e) => updateCurrent('fontSize', parseInt(e.target.value))}
+                />
+                <TextField
+                  label="Color Fuente"
+                  type="color"
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  value={current.fontColor}
+                  onChange={(e) => updateCurrent('fontColor', e.target.value)}
+                />
+              </>
+            )}
+          </AccordionDetails>
+        </Accordion>
+        <Accordion defaultExpanded>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>Acciones</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Button onClick={saveJSON} sx={{ mr: 1 }} variant="outlined">
+              Guardar JSON
+            </Button>
+            <Button onClick={handleSavePDF} sx={{ mr: 1 }} variant="outlined">
+              Guardar PDF
+            </Button>
+            <Button onClick={handleExportHTML} variant="outlined">
+              Exportar HTML
+            </Button>
+            {selectedId !== null && (
+              <Box sx={{ mt: 1 }}>
+                <Button onClick={() => resizeSelected(10)} sx={{ mr: 1 }} size="small" variant="contained">
+                  Aumentar Tamaño
+                </Button>
+                <Button onClick={() => resizeSelected(-10)} size="small" variant="contained">
+                  Reducir Tamaño
+                </Button>
+              </Box>
+            )}
+            <input type="file" accept="application/json" onChange={loadJSON} />
+            <FormControl fullWidth sx={{ mt: 1 }} size="small">
+              <InputLabel id="format-label">Tamaño Página</InputLabel>
+              <Select
+                labelId="format-label"
+                value={formatName}
+                label="Tamaño Página"
+                onChange={handleFormatChange}
+              >
+                <MenuItem value="" disabled>
+                  Seleccionar formato
+                </MenuItem>
+                {paperFormats.map((fmt) => (
+                  <MenuItem key={fmt.name} value={fmt.name}>
+                    {fmt.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
       <canvas
         ref={canvasRef}
         width={canvasWidth}
         height={canvasHeight}
         style={{ border: '1px solid black', margin: '10px' }}
       />
-    </div>
+    </Box>
   );
 }
