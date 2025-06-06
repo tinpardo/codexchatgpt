@@ -109,17 +109,15 @@ export default function CanvasPage() {
           if (['nw', 'ne', 'se', 'sw'].includes(hnd)) {
             const opp = { nw: 'se', ne: 'sw', se: 'nw', sw: 'ne' }[hnd];
             const pos = getCornerPos(sel, opp);
-            const local = pointToShape(sel, pos.x, pos.y);
             setResizingId(sel.id);
             setResizeStart({
-              x: pos.x,
-              y: pos.y,
+              anchorX: pos.x,
+              anchorY: pos.y,
               width: sel.width,
               height: sel.height,
               radius: sel.radius,
               fontSize: sel.fontSize,
-              anchorX: local.x,
-              anchorY: local.y,
+              rotation: sel.rotation,
             });
             return;
           }
@@ -130,17 +128,15 @@ export default function CanvasPage() {
         if (hit(s, x, y)) {
           setSelectedId(s.id);
           if (e.shiftKey) {
-            const local = pointToShape(s, x, y);
             setResizingId(s.id);
             setResizeStart({
-              x,
-              y,
+              anchorX: x,
+              anchorY: y,
               width: s.width,
               height: s.height,
               radius: s.radius,
               fontSize: s.fontSize,
-              anchorX: local.x,
-              anchorY: local.y,
+              rotation: s.rotation,
             });
           } else {
             setDraggingId(s.id);
@@ -206,17 +202,31 @@ export default function CanvasPage() {
       if (resizingId !== null && resizeStart) {
         const sel = shapes.find((s) => s.id === resizingId);
         if (sel) {
-          const curr = pointToShape(sel, x, y);
-          const start = { x: resizeStart.anchorX, y: resizeStart.anchorY };
-          const w = Math.abs(curr.x - start.x);
-          const h = Math.abs(curr.y - start.y);
-          const midLocal = { x: (curr.x + start.x) / 2, y: (curr.y + start.y) / 2 };
-          const mid = shapeToPoint(sel, midLocal.x, midLocal.y);
+          const angle = (-sel.rotation * Math.PI) / 180;
+          const dx = x - resizeStart.anchorX;
+          const dy = y - resizeStart.anchorY;
+          const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+          const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+          const w = Math.abs(localX);
+          const h = Math.abs(localY);
+          const midLocalX = localX / 2;
+          const midLocalY = localY / 2;
+          const angle2 = (sel.rotation * Math.PI) / 180;
+          const mid = {
+            x:
+              resizeStart.anchorX +
+              midLocalX * Math.cos(angle2) -
+              midLocalY * Math.sin(angle2),
+            y:
+              resizeStart.anchorY +
+              midLocalX * Math.sin(angle2) +
+              midLocalY * Math.cos(angle2),
+          };
           setShapes((prev) =>
             prev.map((s) => {
               if (s.id !== resizingId) return s;
               if (s.type === 'text') {
-                const diff = Math.max(curr.x - start.x, curr.y - start.y);
+                const diff = Math.max(localX, localY);
                 return {
                   ...s,
                   fontSize: Math.max(5, resizeStart.fontSize + diff),
@@ -307,17 +317,31 @@ export default function CanvasPage() {
         const { x, y } = getPos(e);
         const sel = shapes.find((s) => s.id === resizingId);
         if (sel) {
-          const curr = pointToShape(sel, x, y);
-          const start = { x: resizeStart.anchorX, y: resizeStart.anchorY };
-          const w = Math.abs(curr.x - start.x);
-          const h = Math.abs(curr.y - start.y);
-          const midLocal = { x: (curr.x + start.x) / 2, y: (curr.y + start.y) / 2 };
-          const mid = shapeToPoint(sel, midLocal.x, midLocal.y);
+          const angle = (-sel.rotation * Math.PI) / 180;
+          const dx = x - resizeStart.anchorX;
+          const dy = y - resizeStart.anchorY;
+          const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+          const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+          const w = Math.abs(localX);
+          const h = Math.abs(localY);
+          const midLocalX = localX / 2;
+          const midLocalY = localY / 2;
+          const angle2 = (sel.rotation * Math.PI) / 180;
+          const mid = {
+            x:
+              resizeStart.anchorX +
+              midLocalX * Math.cos(angle2) -
+              midLocalY * Math.sin(angle2),
+            y:
+              resizeStart.anchorY +
+              midLocalX * Math.sin(angle2) +
+              midLocalY * Math.cos(angle2),
+          };
           setShapes((prev) =>
             prev.map((s) => {
               if (s.id !== resizingId) return s;
               if (s.type === 'text') {
-                const diff = Math.max(curr.x - start.x, curr.y - start.y);
+                const diff = Math.max(localX, localY);
                 return {
                   ...s,
                   fontSize: Math.max(5, resizeStart.fontSize + diff),
