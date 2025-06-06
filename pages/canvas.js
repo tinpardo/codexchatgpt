@@ -39,7 +39,7 @@ import Menu from '@mui/material/Menu';
 import { crearPagina, agregarPagina } from '../modules/paginas';
 import MenuBar from '../components/MenuBar';
 import useZoom from '../modules/zoom';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { getAuth } from '@clerk/nextjs/server';
 
 const TrapezoidIcon = () => (
@@ -54,6 +54,7 @@ export default function CanvasPage() {
   const jsonInputRef = useRef(null);
   // Información del usuario autenticado
   const { user } = useUser();
+  const { signOut } = useClerk();
   const [shapes, setShapes] = useState([]);
   const [pendingImage, setPendingImage] = useState(null);
   const [drawingImage, setDrawingImage] = useState(false);
@@ -818,6 +819,7 @@ export default function CanvasPage() {
         onLoadJSON={handleLoadJSONClick}
         onSavePDF={handleSavePDF}
         onExportHTML={handleExportHTML}
+        onSignOut={signOut}
         onResizePlus={() => resizeSelected(10)}
         onResizeMinus={() => resizeSelected(-10)}
         onBringToFront={bringSelectedToFront}

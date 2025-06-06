@@ -17,6 +17,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 /**
  * Barra de menú que agrupa acciones en "Archivo", "Edición" y "Vista".
@@ -27,6 +28,7 @@ export default function MenuBar({
   onLoadJSON,
   onSavePDF,
   onExportHTML,
+  onSignOut,
   onResizePlus,
   onResizeMinus,
   onBringToFront,
@@ -77,6 +79,12 @@ export default function MenuBar({
               <CodeIcon fontSize="small" />
             </ListItemIcon>
             Exportar HTML
+          </MenuItem>
+          <MenuItem onClick={() => { onSignOut?.(); setArchivoAnchor(null); }}>
+            <ListItemIcon>
+              <LogoutIcon fontSize="small" />
+            </ListItemIcon>
+            Cerrar Sesión
           </MenuItem>
         </Menu>
 
