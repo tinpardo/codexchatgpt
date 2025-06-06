@@ -24,6 +24,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
+import { crearPagina, agregarPagina } from '../modules/paginas';
 
 const TrapezoidIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24">
@@ -74,6 +75,8 @@ export default function CanvasPage() {
   const [selectionBounds, setSelectionBounds] = useState(null);
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [pages, setPages] = useState([crearPagina(800, 600)]);
+  const [currentPage, setCurrentPage] = useState(0);
 
 
   useEffect(() => {
@@ -115,6 +118,27 @@ export default function CanvasPage() {
       }
     }
   }, [selectedId, shapes]);
+
+  // Cambia las formas y tamaño cuando se selecciona otra página
+  useEffect(() => {
+    const pg = pages[currentPage];
+    if (pg) {
+      setShapes(pg.shapes);
+      setCanvasWidth(pg.width);
+      setCanvasHeight(pg.height);
+    }
+  }, [currentPage]);
+
+  // Guarda automáticamente los cambios en la página actual
+  useEffect(() => {
+    setPages((prev) =>
+      prev.map((p, idx) =>
+        idx === currentPage
+          ? { ...p, shapes, width: canvasWidth, height: canvasHeight }
+          : p
+      )
+    );
+  }, [shapes, canvasWidth, canvasHeight]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -627,6 +651,19 @@ export default function CanvasPage() {
     }
   };
 
+  const handleAddPage = () => {
+    setPages((prev) => {
+      const updated = agregarPagina(prev, canvasWidth, canvasHeight);
+      setCurrentPage(updated.length - 1);
+      return updated;
+    });
+    setShapes([]);
+  };
+
+  const handlePageChange = (e) => {
+    setCurrentPage(parseInt(e.target.value));
+  };
+
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key === 'Delete') {
@@ -884,6 +921,31 @@ export default function CanvasPage() {
                 ))}
               </Select>
             </FormControl>
+          </AccordionDetails>
+        </Accordion>
+        <Accordion defaultExpanded>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>Páginas</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <FormControl fullWidth size="small">
+              <InputLabel id="page-label">Página</InputLabel>
+              <Select
+                labelId="page-label"
+                value={currentPage}
+                label="Página"
+                onChange={handlePageChange}
+              >
+                {pages.map((_, idx) => (
+                  <MenuItem key={idx} value={idx}>
+                    Página {idx + 1}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button onClick={handleAddPage} sx={{ mt: 1 }} variant="contained" fullWidth>
+              Nueva Página
+            </Button>
           </AccordionDetails>
         </Accordion>
       </Box>
