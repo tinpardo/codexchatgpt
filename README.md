@@ -44,3 +44,4 @@ El proyecto se ha organizado en archivos de módulo ubicados en la carpeta `modu
 
 - `modules/impresion.js` contiene las funciones para exportar el lienzo a **PDF** y **HTML**.
 - `modules/figuras.js` agrupa la lógica de transformación y dibujo de las figuras sobre el canvas.
+- `modules/eliminacion.js` incluye utilidades para borrar uno o varios objetos del listado de formas.
