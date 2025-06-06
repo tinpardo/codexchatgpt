@@ -856,6 +856,12 @@ export default function CanvasPage() {
                   {opt.icon}
                 </IconButton>
               ))}
+              <IconButton onClick={zoomIn} title="Acercar">
+                <MdZoomIn />
+              </IconButton>
+              <IconButton onClick={zoomOut} title="Alejar">
+                <MdZoomOut />
+              </IconButton>
             </Box>
             <input
               type="file"
