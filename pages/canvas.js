@@ -73,7 +73,6 @@ export default function CanvasPage() {
   const [canvasHeight, setCanvasHeight] = useState(600);
   const [formatName, setFormatName] = useState('');
   const [selectionBounds, setSelectionBounds] = useState(null);
-  const [thumbnailUrl, setThumbnailUrl] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [pages, setPages] = useState([crearPagina(800, 600)]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -94,8 +93,10 @@ export default function CanvasPage() {
     }
     // Update thumbnail automatically whenever the canvas content changes
     const thumb = generateThumbnail(canvas);
-    setThumbnailUrl(thumb);
-  }, [shapes, previewShape, selectedId, canvasWidth, canvasHeight, selectionBounds]);
+    setPages((prev) =>
+      prev.map((p, idx) => (idx === currentPage ? { ...p, thumbnail: thumb } : p))
+    );
+  }, [shapes, previewShape, selectedId, canvasWidth, canvasHeight, selectionBounds, currentPage]);
 
   useEffect(() => {
     if (selectedId !== null) {
@@ -531,10 +532,6 @@ export default function CanvasPage() {
     exportHTML(pages);
   };
 
-  const handleShowThumbnail = () => {
-    const url = generateThumbnail(canvasRef.current);
-    setThumbnailUrl(url);
-  };
 
   const resizeSelected = (delta) => {
     if (selectedId === null) return;
@@ -870,9 +867,6 @@ export default function CanvasPage() {
             <Button onClick={handleExportHTML} variant="outlined">
               Exportar HTML
             </Button>
-            <Button onClick={handleShowThumbnail} sx={{ mt: 1 }} variant="outlined">
-              Ver Miniatura
-            </Button>
             {selectedId !== null && (
               <>
                 <Box sx={{ mt: 1 }}>
@@ -955,11 +949,27 @@ export default function CanvasPage() {
         height={canvasHeight}
         style={{ border: '1px solid black', margin: '10px' }}
       />
-      {thumbnailUrl && (
-        <Box sx={{ ml: 2 }}>
-          <img src={thumbnailUrl} alt="Miniatura" style={{ border: '1px solid #ccc' }} />
-        </Box>
-      )}
+      <Box sx={{ width: 200, p: 1, overflowY: 'auto' }}>
+        {pages.map((p, idx) => (
+          <Box
+            key={p.id}
+            sx={{
+              border: currentPage === idx ? '2px solid blue' : '1px solid #ccc',
+              mb: 1,
+              cursor: 'pointer',
+            }}
+            onClick={() => setCurrentPage(idx)}
+          >
+            {p.thumbnail ? (
+              <img src={p.thumbnail} alt={`Miniatura ${idx + 1}`} style={{ width: '100%' }} />
+            ) : (
+              <Box sx={{ width: '100%', height: 100, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography variant="caption">Sin vista previa</Typography>
+              </Box>
+            )}
+          </Box>
+        ))}
+      </Box>
       <Menu
         open={Boolean(contextMenu)}
         onClose={() => setContextMenu(null)}
