@@ -374,13 +374,28 @@ export default function CanvasPage() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const data = JSON.parse(ev.target.result);
+      const toNumber = (v) => (v !== undefined ? Number(v) : v);
       const loaded = data.map((s) => {
-        if (s.type === 'image' && s.src) {
+        const base = {
+          ...s,
+          id: s.id ?? Date.now() + Math.random(),
+          x: toNumber(s.x),
+          y: toNumber(s.y),
+          width: toNumber(s.width),
+          height: toNumber(s.height),
+          radius: toNumber(s.radius),
+          strokeWidth: toNumber(s.strokeWidth),
+          rotation: toNumber(s.rotation),
+          opacity: toNumber(s.opacity),
+          lineDash: toNumber(s.lineDash),
+          fontSize: toNumber(s.fontSize),
+        };
+        if (base.type === 'image' && base.src) {
           const img = new Image();
-          img.src = s.src;
-          return { ...s, img };
+          img.src = base.src;
+          return { ...base, img };
         }
-        return s;
+        return base;
       });
       setShapes(loaded);
     };
