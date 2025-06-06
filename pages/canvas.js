@@ -23,6 +23,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
 
 const TrapezoidIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24">
@@ -72,6 +73,7 @@ export default function CanvasPage() {
   const [formatName, setFormatName] = useState('');
   const [selectionBounds, setSelectionBounds] = useState(null);
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
+  const [contextMenu, setContextMenu] = useState(null);
 
 
   useEffect(() => {
@@ -129,6 +131,7 @@ export default function CanvasPage() {
     };
 
     const handleDown = (e) => {
+      setContextMenu(null);
       const { x, y } = getPos(e);
       if (drawingImage && pendingImage) {
         setImageStart({ x, y });
@@ -419,12 +422,24 @@ export default function CanvasPage() {
       setRotateId(null);
       setPreviewShape(null);
     };
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      const { x, y } = getPos(e);
+      const sel = shapes.find((s) => s.id === selectedId);
+      if (sel && hit(sel, x, y)) {
+        setContextMenu({ mouseX: e.clientX - 2, mouseY: e.clientY - 4 });
+      } else {
+        setContextMenu(null);
+      }
+    };
     canvas.addEventListener('mousedown', handleDown);
     canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('contextmenu', handleContextMenu);
     window.addEventListener('mouseup', handleUp);
     return () => {
       canvas.removeEventListener('mousedown', handleDown);
       canvas.removeEventListener('mousemove', handleMove);
+      canvas.removeEventListener('contextmenu', handleContextMenu);
       window.removeEventListener('mouseup', handleUp);
     };
   }, [shapes, draggingId, dragOffset, drawingImage, imageStart, pendingImage, resizingId, resizeStart, drawingShape, shapeStart, pendingShape, selectedId, rotateId, rotateStart]);
@@ -880,6 +895,55 @@ export default function CanvasPage() {
           <img src={thumbnailUrl} alt="Miniatura" style={{ border: '1px solid #ccc' }} />
         </Box>
       )}
+      <Menu
+        open={Boolean(contextMenu)}
+        onClose={() => setContextMenu(null)}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
+        }
+      >
+        <MenuItem
+          onClick={() => {
+            bringSelectedToFront();
+            setContextMenu(null);
+          }}
+        >
+          Al Frente
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            sendSelectedToBack();
+            setContextMenu(null);
+          }}
+        >
+          Al Fondo
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            bringSelectedForward();
+            setContextMenu(null);
+          }}
+        >
+          Adelantar
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            sendSelectedBackward();
+            setContextMenu(null);
+          }}
+        >
+          Atrasar
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            deleteSelected();
+            setContextMenu(null);
+          }}
+        >
+          Eliminar
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }
