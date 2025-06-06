@@ -54,6 +54,7 @@ export default function CanvasPage() {
   const [canvasWidth, setCanvasWidth] = useState(800);
   const [canvasHeight, setCanvasHeight] = useState(600);
   const [formatName, setFormatName] = useState('');
+  const [selectionBounds, setSelectionBounds] = useState(null);
 
 
   useEffect(() => {
@@ -61,14 +62,26 @@ export default function CanvasPage() {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     shapes.forEach((shape) => {
-      drawShape(ctx, shape, selectedId);
+      const bounds = shape.id === selectedId ? selectionBounds : null;
+      drawShape(ctx, shape, selectedId, bounds);
     });
     if (previewShape) {
       ctx.globalAlpha = 0.5;
       drawShape(ctx, previewShape);
       ctx.globalAlpha = 1;
     }
-  }, [shapes, previewShape, selectedId, canvasWidth, canvasHeight]);
+  }, [shapes, previewShape, selectedId, canvasWidth, canvasHeight, selectionBounds]);
+
+  useEffect(() => {
+    if (selectedId !== null) {
+      const sel = shapes.find((s) => s.id === selectedId);
+      if (sel) {
+        setSelectionBounds(bounds(sel));
+      }
+    } else {
+      setSelectionBounds(null);
+    }
+  }, [selectedId, shapes]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
