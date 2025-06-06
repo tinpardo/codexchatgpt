@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { savePDF, exportHTML } from '../modules/impresion';
 import { generateThumbnail } from '../modules/thumbnail';
+import { bringToFront, sendToBack, bringForward, sendBackward } from '../modules/arrangement';
+import { deleteById } from '../modules/eliminacion';
 import { pointToShape, shapeToPoint, bounds, cornerHit, getCornerPos, drawShape } from '../modules/figuras';
 import { TbRectangle, TbSquare, TbCircle, TbTriangle, TbDiamond, TbPentagon, TbHexagon, TbOctagon, TbStar, TbArrowRight, TbHeart, TbTypography } from 'react-icons/tb';
 import { IoEllipse } from 'react-icons/io5';
@@ -512,6 +514,32 @@ export default function CanvasPage() {
     );
   };
 
+  const bringSelectedToFront = () => {
+    if (selectedId === null) return;
+    setShapes((prev) => bringToFront(prev, selectedId));
+  };
+
+  const sendSelectedToBack = () => {
+    if (selectedId === null) return;
+    setShapes((prev) => sendToBack(prev, selectedId));
+  };
+
+  const bringSelectedForward = () => {
+    if (selectedId === null) return;
+    setShapes((prev) => bringForward(prev, selectedId));
+  };
+
+  const sendSelectedBackward = () => {
+    if (selectedId === null) return;
+    setShapes((prev) => sendBackward(prev, selectedId));
+  };
+
+  const deleteSelected = () => {
+    if (selectedId === null) return;
+    setShapes((prev) => deleteById(prev, selectedId));
+    setSelectedId(null);
+  };
+
 
   const updateCurrent = (field, value) => {
     setCurrent({ ...current, [field]: value });
@@ -580,6 +608,16 @@ export default function CanvasPage() {
       setFormatName(fmt.name);
     }
   };
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'Delete') {
+        deleteSelected();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [selectedId]);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
@@ -781,14 +819,33 @@ export default function CanvasPage() {
               Ver Miniatura
             </Button>
             {selectedId !== null && (
-              <Box sx={{ mt: 1 }}>
-                <Button onClick={() => resizeSelected(10)} sx={{ mr: 1 }} size="small" variant="contained">
-                  Aumentar Tamaño
-                </Button>
-                <Button onClick={() => resizeSelected(-10)} size="small" variant="contained">
-                  Reducir Tamaño
-                </Button>
-              </Box>
+              <>
+                <Box sx={{ mt: 1 }}>
+                  <Button onClick={() => resizeSelected(10)} sx={{ mr: 1 }} size="small" variant="contained">
+                    Aumentar Tamaño
+                  </Button>
+                  <Button onClick={() => resizeSelected(-10)} size="small" variant="contained">
+                    Reducir Tamaño
+                  </Button>
+                </Box>
+                <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  <Button onClick={bringSelectedToFront} size="small" variant="outlined">
+                    Al Frente
+                  </Button>
+                  <Button onClick={sendSelectedToBack} size="small" variant="outlined">
+                    Al Fondo
+                  </Button>
+                  <Button onClick={bringSelectedForward} size="small" variant="outlined">
+                    Adelantar
+                  </Button>
+                  <Button onClick={sendSelectedBackward} size="small" variant="outlined">
+                    Atrasar
+                  </Button>
+                  <Button onClick={deleteSelected} size="small" color="error" variant="contained">
+                    Eliminar
+                  </Button>
+                </Box>
+              </>
             )}
             <input type="file" accept="application/json" onChange={loadJSON} />
             <FormControl fullWidth sx={{ mt: 1 }} size="small">
