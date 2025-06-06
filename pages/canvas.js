@@ -723,13 +723,13 @@ export default function CanvasPage() {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography>Propiedades</Typography>
           </AccordionSummary>
-          <AccordionDetails>
+          <AccordionDetails sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 60px)', gap: 1 }}>
             <TextField
               label="X"
               type="number"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.x}
               onChange={(e) => updateCurrent('x', parseInt(e.target.value))}
             />
@@ -738,7 +738,7 @@ export default function CanvasPage() {
               type="number"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.y}
               onChange={(e) => updateCurrent('y', parseInt(e.target.value))}
             />
@@ -747,7 +747,7 @@ export default function CanvasPage() {
               type="number"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.width}
               onChange={(e) => updateCurrent('width', parseInt(e.target.value))}
             />
@@ -756,7 +756,7 @@ export default function CanvasPage() {
               type="number"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.height}
               onChange={(e) => updateCurrent('height', parseInt(e.target.value))}
             />
@@ -765,7 +765,7 @@ export default function CanvasPage() {
               type="number"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.radius}
               onChange={(e) => updateCurrent('radius', parseInt(e.target.value))}
             />
@@ -774,7 +774,7 @@ export default function CanvasPage() {
               type="number"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.rotation}
               onChange={(e) => updateCurrent('rotation', parseInt(e.target.value))}
             />
@@ -784,7 +784,7 @@ export default function CanvasPage() {
               inputProps={{ step: 0.1, min: 0, max: 1 }}
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.opacity}
               onChange={(e) => updateCurrent('opacity', parseFloat(e.target.value))}
             />
@@ -793,7 +793,7 @@ export default function CanvasPage() {
               type="color"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.fillColor}
               onChange={(e) => updateCurrent('fillColor', e.target.value)}
             />
@@ -802,7 +802,7 @@ export default function CanvasPage() {
               type="color"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.strokeColor}
               onChange={(e) => updateCurrent('strokeColor', e.target.value)}
             />
@@ -811,7 +811,7 @@ export default function CanvasPage() {
               type="number"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.strokeWidth}
               onChange={(e) => updateCurrent('strokeWidth', parseInt(e.target.value))}
             />
@@ -820,7 +820,7 @@ export default function CanvasPage() {
               type="number"
               size="small"
               margin="dense"
-              sx={{ width: 120 }}
+              sx={{ width: 60 }}
               value={current.lineDash}
               onChange={(e) => updateCurrent('lineDash', parseInt(e.target.value))}
             />
@@ -830,7 +830,7 @@ export default function CanvasPage() {
                   label="Texto"
                   size="small"
                   margin="dense"
-                  sx={{ width: 120 }}
+                  sx={{ width: 60 }}
                   value={current.text}
                   onChange={(e) => updateCurrent('text', e.target.value)}
                 />
@@ -839,7 +839,7 @@ export default function CanvasPage() {
                   type="number"
                   size="small"
                   margin="dense"
-                  sx={{ width: 120 }}
+                  sx={{ width: 60 }}
                   value={current.fontSize}
                   onChange={(e) => updateCurrent('fontSize', parseInt(e.target.value))}
                 />
@@ -848,7 +848,7 @@ export default function CanvasPage() {
                   type="color"
                   size="small"
                   margin="dense"
-                  sx={{ width: 120 }}
+                  sx={{ width: 60 }}
                   value={current.fontColor}
                   onChange={(e) => updateCurrent('fontColor', e.target.value)}
                 />
