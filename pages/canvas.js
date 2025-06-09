@@ -41,6 +41,7 @@ import MenuBar from '../components/MenuBar';
 import useZoom from '../modules/zoom';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { getAuth } from '@clerk/nextjs/server';
+import { cmykToHex } from '../modules/cmyk';
 
 const TrapezoidIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24">
@@ -676,6 +677,13 @@ export default function CanvasPage() {
     }
   };
 
+  const updateColorCMYK = (field, value) => {
+    const parts = value.split(/[,\s]+/).map((n) => parseFloat(n));
+    if (parts.length !== 4 || parts.some((n) => isNaN(n))) return;
+    const hex = cmykToHex(parts[0], parts[1], parts[2], parts[3]);
+    updateCurrent(field, hex);
+  };
+
   const handleImageClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -965,6 +973,14 @@ export default function CanvasPage() {
               onChange={(e) => updateCurrent('fillColor', e.target.value)}
             />
             <TextField
+              label="CMYK Relleno"
+              size="small"
+              margin="dense"
+              placeholder="c m y k"
+              sx={{ width: 80 }}
+              onBlur={(e) => updateColorCMYK('fillColor', e.target.value)}
+            />
+            <TextField
               label="Color Borde"
               type="color"
               size="small"
@@ -972,6 +988,14 @@ export default function CanvasPage() {
               sx={{ width: 60 }}
               value={current.strokeColor}
               onChange={(e) => updateCurrent('strokeColor', e.target.value)}
+            />
+            <TextField
+              label="CMYK Borde"
+              size="small"
+              margin="dense"
+              placeholder="c m y k"
+              sx={{ width: 80 }}
+              onBlur={(e) => updateColorCMYK('strokeColor', e.target.value)}
             />
             <TextField
               label="Grosor Borde"
