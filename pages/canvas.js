@@ -974,11 +974,12 @@ export default function CanvasPage() {
             />
             <TextField
               label="CMYK Relleno"
+              type="color"
               size="small"
               margin="dense"
-              placeholder="c m y k"
-              sx={{ width: 80 }}
-              onBlur={(e) => updateColorCMYK('fillColor', e.target.value)}
+              sx={{ width: 60 }}
+              value={current.fillColor}
+              onChange={(e) => updateCurrent('fillColor', e.target.value)}
             />
             <TextField
               label="Color Borde"
@@ -991,11 +992,12 @@ export default function CanvasPage() {
             />
             <TextField
               label="CMYK Borde"
+              type="color"
               size="small"
               margin="dense"
-              placeholder="c m y k"
-              sx={{ width: 80 }}
-              onBlur={(e) => updateColorCMYK('strokeColor', e.target.value)}
+              sx={{ width: 60 }}
+              value={current.strokeColor}
+              onChange={(e) => updateCurrent('strokeColor', e.target.value)}
             />
             <TextField
               label="Grosor Borde"
