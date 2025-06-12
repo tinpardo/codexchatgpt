@@ -200,6 +200,7 @@ export default function CanvasPage() {
         if (sel) {
           const hnd = cornerHit(sel, x, y);
           if (hnd === 'rotate') {
+            setShapes((prev) => prev);
             setRotateId(sel.id);
             setRotateStart({ x, y, angle: sel.rotation });
             return;
@@ -207,6 +208,7 @@ export default function CanvasPage() {
           if (['nw', 'ne', 'se', 'sw'].includes(hnd)) {
             const opp = { nw: 'se', ne: 'sw', se: 'nw', sw: 'ne' }[hnd];
             const pos = getCornerPos(sel, opp);
+            setShapes((prev) => prev);
             setResizingId(sel.id);
             setResizeStart({
               anchorX: pos.x,
@@ -227,6 +229,7 @@ export default function CanvasPage() {
           setSelectedId(s.id);
           setSelectionBounds(bounds(s));
           if (e.shiftKey) {
+            setShapes((prev) => prev);
             setResizingId(s.id);
             setResizeStart({
               anchorX: x,
@@ -238,6 +241,7 @@ export default function CanvasPage() {
               rotation: s.rotation,
             });
           } else {
+            setShapes((prev) => prev);
             setDraggingId(s.id);
             setDragOffset({ x: x - s.x, y: y - s.y });
           }
@@ -295,7 +299,9 @@ export default function CanvasPage() {
           const ang0 = Math.atan2(rotateStart.y - sel.y, rotateStart.x - sel.x);
           const ang1 = Math.atan2(y - sel.y, x - sel.x);
           const diff = ((ang1 - ang0) * 180) / Math.PI;
-          setShapes((prev) => prev.map((s) => (s.id === rotateId ? { ...s, rotation: rotateStart.angle + diff } : s)));
+          replaceShapes((prev) =>
+            prev.map((s) => (s.id === rotateId ? { ...s, rotation: rotateStart.angle + diff } : s))
+          );
         }
         return;
       }
@@ -322,7 +328,7 @@ export default function CanvasPage() {
               midLocalX * Math.sin(angle2) +
               midLocalY * Math.cos(angle2),
           };
-          setShapes((prev) =>
+          replaceShapes((prev) =>
             prev.map((s) => {
               if (s.id !== resizingId) return s;
               if (s.type === 'text') {
@@ -358,7 +364,7 @@ export default function CanvasPage() {
         return;
       }
       if (draggingId !== null) {
-        setShapes((prev) =>
+        replaceShapes((prev) =>
           prev.map((s) =>
             s.id === draggingId ? { ...s, x: x - dragOffset.x, y: y - dragOffset.y } : s
           )
@@ -437,7 +443,7 @@ export default function CanvasPage() {
               midLocalX * Math.sin(angle2) +
               midLocalY * Math.cos(angle2),
           };
-          setShapes((prev) =>
+          replaceShapes((prev) =>
             prev.map((s) => {
               if (s.id !== resizingId) return s;
               if (s.type === 'text') {
@@ -490,7 +496,7 @@ export default function CanvasPage() {
                 idx === dropIndex ? { ...p, shapes: [...p.shapes, moving] } : p
               )
             );
-            setShapes((prev) => prev.filter((s) => s.id !== draggingId));
+            replaceShapes((prev) => prev.filter((s) => s.id !== draggingId));
           }
         }
       }
