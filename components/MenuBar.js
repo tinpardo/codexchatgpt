@@ -39,6 +39,8 @@ export default function MenuBar({
   onAddPage,
   onZoomIn,
   onZoomOut,
+  onUndo,
+  onRedo,
 }) {
   const [archivoAnchor, setArchivoAnchor] = useState(null);
   const [edicionAnchor, setEdicionAnchor] = useState(null);
@@ -94,6 +96,12 @@ export default function MenuBar({
           open={Boolean(edicionAnchor)}
           onClose={closeMenu(setEdicionAnchor)}
         >
+          <MenuItem onClick={() => { onUndo?.(); setEdicionAnchor(null); }}>
+            Deshacer
+          </MenuItem>
+          <MenuItem onClick={() => { onRedo?.(); setEdicionAnchor(null); }}>
+            Rehacer
+          </MenuItem>
           <MenuItem onClick={() => { onResizePlus?.(); setEdicionAnchor(null); }}>
             <ListItemIcon>
               <ZoomInIcon fontSize="small" />

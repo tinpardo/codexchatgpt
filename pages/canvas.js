@@ -39,6 +39,7 @@ import Menu from '@mui/material/Menu';
 import { crearPagina, agregarPagina } from '../modules/paginas';
 import MenuBar from '../components/MenuBar';
 import useZoom from '../modules/zoom';
+import useHistory from '../modules/history';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { getAuth } from '@clerk/nextjs/server';
 import { cmykToHex } from '../modules/cmyk';
@@ -56,7 +57,7 @@ export default function CanvasPage() {
   // Información del usuario autenticado
   const { user } = useUser();
   const { signOut } = useClerk();
-  const [shapes, setShapes] = useState([]);
+  const { state: shapes, set: setShapes, replace: replaceShapes, undo, redo, canUndo, canRedo } = useHistory([]);
   const [pendingImage, setPendingImage] = useState(null);
   const [drawingImage, setDrawingImage] = useState(false);
   const [imageStart, setImageStart] = useState(null);
@@ -149,7 +150,7 @@ export default function CanvasPage() {
   useEffect(() => {
     const pg = pages[currentPage];
     if (pg) {
-      setShapes(pg.shapes);
+      replaceShapes(pg.shapes);
       setCanvasWidth(pg.width);
       setCanvasHeight(pg.height);
     }
@@ -555,7 +556,7 @@ export default function CanvasPage() {
         }
         return base;
       });
-      setShapes(loaded);
+      replaceShapes(loaded);
     };
     reader.readAsText(file);
   };
@@ -838,6 +839,8 @@ export default function CanvasPage() {
         onAddPage={handleAddPage}
         onZoomIn={zoomIn}
         onZoomOut={zoomOut}
+        onUndo={undo}
+        onRedo={redo}
       />
       <Box sx={{ display: 'flex', height: '100vh' }}>
       <Box sx={{ width: 250, p: 1, overflowY: 'auto' }}>
